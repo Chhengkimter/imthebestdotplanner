@@ -86,8 +86,13 @@ body {
   display: flex; align-items: center; gap: 8px;
 }
 .nav-brand-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--pink-3), var(--lav-3));
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-brand-dot::before {
+  content: '✿';
 }
 .nav-links { display: flex; gap: 3px; }
 .nav-link {
@@ -373,17 +378,20 @@ body {
 
 <!-- NAV -->
 <nav class="nav">
-  <a href="index2.html" class="nav-brand"><span class="brand-deco">✿</span><span>My Planner</span></a>
+  <a href="index2.html" class="nav-brand">
+    <div class="nav-brand-dot"></div>
+    My Planner
+  </a>
   <div class="nav-links">
-    <a href="dashboard.html" class="nav-link"><span>🏠</span><span>Dashboard</span></a>
-    <a href="todo.html" class="nav-link"><span>✅</span><span>To-Do</span></a>
-    <a href="goal.html" class="nav-link active"><span>🎯</span><span>Goals</span></a>
-    <a href="finance.html" class="nav-link"><span>💰</span><span>Finance</span></a>
-    <a href="planner.html" class="nav-link"><span>📅</span><span>Planner</span></a>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="todo.html"      class="nav-link">To-Do</a>
+    <a href="goal.html"      class="nav-link active">Goals</a>
+    <a href="finance.html"   class="nav-link">Finance</a>
+    <a href="planner.html"   class="nav-link">Planner</a>
   </div>
   <div class="nav-user" id="nav-user" style="display:none">
-    <span id="nav-avatar-initial" style="width:28px;height:28px;border-radius:50%;background:var(--grass-pale);color:var(--grass-deep);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0;"></span>
-    <span id="nav-name"></span>
+    <div class="nav-avatar" id="nav-avatar">?</div>
+    <span class="nav-user-name" id="nav-name"></span>
     <button class="nav-signout" onclick="signOut()" title="Sign out">✕</button>
   </div>
 </nav>
@@ -674,7 +682,7 @@ auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('auth-overlay').classList.add('hidden');
     document.getElementById('nav-user').style.display = 'flex';
-    document.getElementById('nav-avatar-initial').textContent = (user.email || '?')[0].toUpperCase();
+    document.getElementById('nav-avatar').textContent = (user.email || '?')[0].toUpperCase();
     document.getElementById('nav-name').textContent = user.email?.split('@')[0] || '';
     setupFirestoreListeners(user.uid);
   } else {

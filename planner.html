@@ -107,8 +107,13 @@ body {
   display: flex; align-items: center; gap: 8px;
 }
 .nav-brand-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--pink-3), var(--lav-3));
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-brand-dot::before {
+  content: '✿';
 }
 .nav-links { display: flex; gap: 3px; }
 .nav-link {
@@ -784,6 +789,7 @@ textarea.text-input { resize: vertical; min-height: 80px; line-height: 1.6; }
       <div class="months-header">
         <h2>2026</h2>
         <span style="font-size:0.75rem;color:var(--text-3);letter-spacing:0.06em;text-transform:uppercase;">Select a month</span>
+        <button class="pill-btn primary" onclick="goToThisWeek()" style="font-size:0.75rem;padding:5px 14px;">✦ This Week</button>
       </div>
       <div class="months-grid" id="months-grid"></div>
     </div>
@@ -1153,6 +1159,12 @@ function renderMonth() {
   renderMonthReminders();
   renderCalendar();
 }
+function goToThisWeek() {
+  const today = new Date();
+  CM = today.getMonth();   // set current month so sidebar loads correctly
+  CWS = getWeekStart(today);
+  showWeek(CWS);
+}
 
 /* Month goal */
 function addMonthGoal() {
@@ -1269,7 +1281,12 @@ function getWeekStart(date) {
   d.setDate(d.getDate() + (day===0 ? -6 : 1-day));
   return d;
 }
-function fmtDate(d) { return d.toISOString().split('T')[0]; }
+function fmtDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 function fmtHour(h) {
   if(h===0)return'12 AM'; if(h===12)return'12 PM';
   return h<12?`${h} AM`:`${h-12} PM`;

@@ -93,8 +93,13 @@ body {
   display: flex; align-items: center; gap: 8px;
 }
 .nav-brand-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--pink-3), var(--lav-3));
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-brand-dot::before {
+  content: '✿';
 }
 .nav-links { display: flex; gap: 3px; }
 .nav-link {
@@ -616,32 +621,31 @@ body {
 <!-- ══════════════════════════════════
      NAVIGATION
 ══════════════════════════════════ -->
-<div class="nav">
-  <a href="planner.html" class="nav-brand">
-    <span class="nav-brand-dot"></span>
-    <span>Planner</span>
+<nav class="nav">
+  <a href="index2.html" class="nav-brand">
+    <div class="nav-brand-dot"></div>
+    My Planner
   </a>
   <div class="nav-links">
     <a href="dashboard.html" class="nav-link">Dashboard</a>
-    <a href="planner.html" class="nav-link">Planner</a>
-    <a href="finance.html" class="nav-link active">Finance</a>
-    <a href="goal.html" class="nav-link">Goals</a>
-    <a href="todo.html" class="nav-link">To-Do</a>
+    <a href="todo.html"      class="nav-link">To-Do</a>
+    <a href="goal.html"      class="nav-link">Goals</a>
+    <a href="finance.html"   class="nav-link active">Finance</a>
+    <a href="planner.html"   class="nav-link">Planner</a>
   </div>
-  <div class="nav-user">
-    <div class="nav-avatar">💰</div>
-    <div>
-      <div class="nav-user-name">Finance</div>
-    </div>
+  <div class="nav-user" id="nav-user" style="display:none">
+    <div class="nav-avatar" id="nav-avatar">?</div>
+    <span class="nav-user-name" id="nav-name"></span>
+    <button class="nav-signout" onclick="signOut()" title="Sign out">✕</button>
   </div>
-</div>
+</nav>
 
 <!-- ══════════════════════════════════
      PAGE HEADER
 ══════════════════════════════════ -->
 <div class="page-header">
   <h1>Financial <span>Dashboard</span></h1>
-  <p>Manage Your Money</p>
+  <p>Brink by Brink</p>
   <div class="header-line">
     <div class="header-dot"></div>
   </div>
@@ -798,6 +802,42 @@ body {
 </div>
 
 <script>
+// ══════════════════════════════════
+// FIREBASE
+// ══════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyDhNIhPG5yOWkk40VMsEGe6WhI_HjjDXxs",
+  authDomain: "imthebestdotplannner.firebaseapp.com",
+  projectId: "imthebestdotplannner",
+  storageBucket: "imthebestdotplannner.firebasestorage.app",
+  messagingSenderId: "600432148406",
+  appId: "1:600432148406:web:080690db2504b94f918b17"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let currentUser = null;
+
+// ══════════════════════════════════
+// AUTH
+// ══════════════════════════════════
+function signOut() { if (confirm('Sign out?')) auth.signOut(); }
+
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('nav-user').style.display = 'flex';
+    document.getElementById('nav-avatar').textContent = (user.email||'?')[0].toUpperCase();
+    document.getElementById('nav-name').textContent = user.email?.split('@')[0] || '';
+  } else {
+    document.getElementById('nav-user').style.display = 'none';
+  }
+});
+
 // ══════════════════════════════════
 // DATA MANAGEMENT
 // ══════════════════════════════════
