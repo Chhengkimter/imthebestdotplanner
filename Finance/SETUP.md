@@ -7,14 +7,14 @@
 Add these packages to your `package.json`:
 
 ```bash
-npm install react recharts
+npm install react recharts firebase
 npm install -D tailwindcss postcss autoprefixer
 ```
 
 Or if using yarn:
 
 ```bash
-yarn add react recharts
+yarn add react recharts firebase
 yarn add -D tailwindcss postcss autoprefixer
 ```
 
@@ -47,6 +47,179 @@ module.exports = {
   },
   plugins: [],
 }
+```
+
+### 3. Set Up Firebase (NEW!)
+
+Follow the complete guide in [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) or quick start in [FIREBASE_QUICKSTART.md](./FIREBASE_QUICKSTART.md)
+
+**TL;DR:**
+1. Install Firebase: `npm install firebase`
+2. Create Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+3. Create Firestore Database
+4. Copy config to `.env` file (use `.env.example` as template)
+5. Done! Data now syncs automatically to Firebase
+
+## Project Structure
+
+```
+Finance/
+├── Finance.jsx              # Main component
+├── FinanceContext.jsx       # State management with Firebase
+├── firebaseConfig.js        # Firebase configuration
+├── firebaseUtils.js         # Helper utilities for Firebase
+├── index.js                 # Exports
+├── .env.example            # Environment variables template
+├── SETUP.md               # This file
+├── FIREBASE_SETUP.md      # Detailed Firebase setup
+├── FIREBASE_QUICKSTART.md # Quick Firebase reference
+└── components/
+    ├── Analytics.jsx
+    ├── BalanceCards.jsx
+    ├── SavingsGoals.jsx
+    └── TransactionPanel.jsx
+```
+
+## Environment Variables
+
+Create a `.env` file with your Firebase config:
+
+```
+REACT_APP_FIREBASE_API_KEY=your_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_auth_domain
+REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+REACT_APP_FIREBASE_APP_ID=your_app_id
+```
+
+See `.env.example` for the template.
+
+## Features
+
+✅ **React Context API** - State management  
+✅ **Firestore Integration** - Cloud data persistence  
+✅ **Automatic Syncing** - Data saves automatically  
+✅ **Real-time Updates** - Up-to-date financial information  
+✅ **Offline Fallback** - Works with default data if offline  
+✅ **Component Library** - Pre-built UI components  
+✅ **Analytics** - Charts and data visualization  
+
+## Using the Finance Module
+
+```javascript
+import { FinanceModule } from './Finance';
+
+function App() {
+  return <FinanceModule />;
+}
+```
+
+## useFinance Hook
+
+Access finance data in any component:
+
+```javascript
+import { useFinance } from './Finance';
+
+function MyComponent() {
+  const {
+    accounts,
+    transactions,
+    goals,
+    addTransaction,
+    loading
+  } = useFinance();
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    // Your component
+  );
+}
+```
+
+## Available Functions
+
+### Account Operations
+- `addAccount(name, color)` - Create new account
+- `updateAccountBalance(accountId, type, amount)` - Update balance
+
+### Transaction Operations
+- `addTransaction(transaction)` - Record transaction
+- `deleteTransaction(transactionId)` - Remove transaction
+- `getMonthTransactions(year, month)` - Filter by month
+
+### Category Operations
+- `addCategory(name, color, type)` - Create category
+- `getCategoryColor(categoryId)` - Get category color
+- `getCategoryName(categoryId)` - Get category name
+
+### Goal Operations
+- `addGoal(title, target)` - Create savings goal
+- `updateGoalProgress(goalId, amount)` - Update goal progress
+- `toggleGoalStep(goalId, stepId)` - Toggle goal step completion
+
+### Analytics
+- `getTotalBalance()` - Sum of all account balances
+- `getMonthlyData()` - Income vs expense by month
+- `getIncomeVsSpendingBreakdown()` - Overall breakdown
+- `getExpensesByCategory()` - Spending by category
+
+## Firebase Data Structure
+
+Data is automatically organized in Firestore:
+
+```
+users/
+  └── user-default/
+      └── data/
+          ├── accounts/items
+          ├── categories/items
+          ├── transactions/items
+          └── goals/items
+```
+
+## Troubleshooting
+
+### Firebase not initialized?
+- Check `.env` file has all required variables
+- Restart dev server after adding `.env`
+- Check browser console for errors
+
+### Data not syncing?
+- Verify Firestore Database is created
+- Check Firestore security rules allow read/write
+- Ensure environment variables are correct
+
+### Module not found: firebase?
+- Run `npm install firebase`
+- Restart dev server
+
+## Next Steps
+
+1. ✅ Install dependencies
+2. ✅ Set up Firebase project
+3. ✅ Configure environment variables
+4. ✅ Import and use FinanceModule
+5. 📅 (Optional) Add authentication for multi-user support
+6. 📅 (Optional) Set up Firestore backup strategy
+
+## Resources
+
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Firestore Reference](https://firebase.google.com/docs/firestore)
+- [React Context API](https://react.dev/reference/react/useContext)
+- [Recharts Documentation](https://recharts.org)
+
+## Support
+
+For issues:
+1. Check browser console for error messages
+2. Review [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
+3. Check Firebase Console for data structure
+4. Verify environment variables in `.env`
+
 ```
 
 ### 3. Include Tailwind in Your CSS
