@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✿ Finance Module ✿</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  /* Pastel palette */
+  --pink-1:    #fce8f0;
+  --pink-2:    #f5c8dc;
+  --pink-3:    #e89abf;
+  --pink-4:    #c96090;
+  --pink-5:    #a03068;
+  --lav-1:     #f0ecfc;
+  --lav-2:     #dcd4f8;
+  --lav-3:     #b8a8ec;
+  --lav-4:     #8068d0;
+  --lav-5:     #5840a8;
+  --blue-1:    #e8f2fc;
+  --blue-2:    #c8dff8;
+  --blue-3:    #90bef0;
+  --blue-4:    #4890d8;
+  --blue-5:    #2068b0;
+  --green-1:   #e8f5ee;
+  --green-2:   #c4e4d0;
+  --green-3:   #88c8a4;
+  --green-4:   #48a872;
+  --green-5:   #2c7850;
+  --peach-1:   #fef0e8;
+  --peach-2:   #fad8c0;
+  --peach-3:   #f0a880;
+  --peach-4:   #d87040;
+  --cream:     #faf8f4;
+  --cream-2:   #f2ede4;
+  --cream-3:   #e0d8c8;
+  --cream-4:   #c8bca8;
+  --white:     #ffffff;
+  --text-1:    #2a2230;
+  --text-2:    #5a5070;
+  --text-3:    #9088a8;
+  --text-4:    #c0b8d0;
+
+  --shadow-sm:  0 2px 8px rgba(90,70,120,0.09);
+  --shadow-md:  0 4px 20px rgba(90,70,120,0.12);
+  --shadow-lg:  0 8px 40px rgba(90,70,120,0.14);
+  --radius-sm:  8px;
+  --radius:     14px;
+  --radius-lg:  22px;
+  --nav-h:      60px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--cream);
+  color: var(--text-1);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 0% 0%,   rgba(220,212,248,0.45) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(200,228,208,0.35) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%,  rgba(252,232,240,0.40) 0%, transparent 40%);
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--cream-3); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-4); }
+
+/* ══════════════════════════════════
+   NAVIGATION
+══════════════════════════════════ */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--nav-h);
+  background: rgba(250,248,244,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--cream-3);
+  display: flex; align-items: center; padding: 0 28px; gap: 0;
+}
+.nav-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem; font-weight: 600;
+  color: var(--lav-4); letter-spacing: 0.04em;
+  margin-right: auto; text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-brand-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-3), var(--lav-3));
+}
+.nav-links { display: flex; gap: 3px; }
+.nav-link {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 50px;
+  border: 1px solid transparent; background: transparent;
+  font-family: 'Nunito', sans-serif; font-size: 0.83rem; font-weight: 500;
+  color: var(--text-2); cursor: pointer; transition: all 0.2s;
+  text-decoration: none; letter-spacing: 0.01em;
+}
+.nav-link:hover { background: var(--cream-2); color: var(--lav-4); }
+.nav-link.active {
+  background: var(--lav-1); border-color: var(--lav-2);
+  color: var(--lav-4); font-weight: 600;
+}
+.nav-user {
+  display: flex; align-items: center; gap: 7px;
+  margin-left: 12px; padding: 4px 12px 4px 4px;
+  background: var(--pink-1); border: 1px solid var(--pink-2);
+  border-radius: 50px; cursor: pointer; transition: all 0.18s;
+}
+.nav-user:hover { background: var(--pink-2); }
+.nav-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-3), var(--lav-3));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 700; color: white; flex-shrink: 0;
+}
+.nav-user-name { font-size: 0.78rem; color: var(--pink-4); font-weight: 500; }
+.nav-signout {
+  font-size: 0.68rem; color: var(--text-3);
+  background: none; border: none; cursor: pointer; transition: color 0.15s;
+}
+.nav-signout:hover { color: var(--pink-4); }
+
+/* ══════════════════════════════════
+   PAGE HEADER
+══════════════════════════════════ */
+.page-header {
+  text-align: center; padding: 36px 20px 20px;
+  position: relative;
+}
+.page-header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 300; color: var(--text-1);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.page-header h1 span { color: var(--lav-4); font-style: italic; font-weight: 400; }
+.page-header p {
+  font-size: 0.8rem; color: var(--text-3);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-top: 5px;
+}
+.header-line {
+  display: flex; align-items: center; gap: 10px;
+  justify-content: center; margin-top: 14px;
+}
+.header-line::before, .header-line::after {
+  content: ''; flex: 0 0 40px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cream-3));
+}
+.header-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--lav-3);
+}
+
+/* ══════════════════════════════════
+   MAIN CONTENT
+══════════════════════════════════ */
+.finance-container {
+  max-width: 1200px; margin: 0 auto; width: 100%;
+  padding: 24px; display: flex; flex-direction: column; gap: 24px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--cream-3);
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--text-1); letter-spacing: 0.04em;
+  margin-bottom: 16px; text-transform: uppercase;
+}
+
+/* ══════════════════════════════════
+   ACCOUNTS SECTION
+══════════════════════════════════ */
+.balance-section {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+}
+
+.balance-card {
+  background: linear-gradient(135deg, rgba(128,104,208,0.15), rgba(232,154,191,0.15));
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--lav-2);
+  text-align: center;
+}
+
+.balance-label {
+  font-size: 0.75rem; color: var(--text-3); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 6px; font-weight: 600;
+}
+
+.balance-amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem; font-weight: 600; color: var(--lav-4);
+  margin-bottom: 8px;
+}
+
+.balance-count {
+  font-size: 0.75rem; color: var(--text-3);
+}
+
+.account-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;
+  margin-top: 16px;
+}
+
+.account-card {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border: 1.5px solid var(--cream-3);
+  border-left: 4px solid var(--lav-4);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.account-card:hover {
+  border-color: var(--lav-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.account-name {
+  font-size: 0.8rem; color: var(--text-2);
+  font-weight: 600; margin-bottom: 6px;
+}
+
+.account-balance {
+  font-size: 1.3rem; color: var(--text-1);
+  font-weight: 600; margin-bottom: 8px;
+}
+
+.account-actions {
+  display: flex; gap: 6px; font-size: 0.7rem;
+}
+
+.account-actions button {
+  flex: 1; padding: 4px; background: var(--cream); border: none;
+  border-radius: 4px; cursor: pointer; color: var(--text-2);
+  font-size: 0.68rem; font-weight: 500; transition: all 0.15s;
+}
+
+.account-actions button:hover {
+  background: var(--lav-1); color: var(--lav-4);
+}
+
+.add-account-btn {
+  padding: 12px; border: 1.5px dashed var(--lav-2);
+  background: var(--lav-1); color: var(--lav-4);
+  border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;
+  font-size: 0.8rem; transition: all 0.2s;
+  font-family: 'Nunito', sans-serif;
+}
+
+.add-account-btn:hover {
+  background: var(--lav-2); border-color: var(--lav-4);
+}
+
+/* ══════════════════════════════════
+   TRANSACTIONS SECTION
+══════════════════════════════════ */
+.transactions-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+
+.transaction-column {
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.transaction-list {
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 400px; overflow-y: auto;
+}
+
+.transaction-item {
+  background: var(--cream); border-radius: var(--radius-sm);
+  padding: 12px; border: 1px solid var(--cream-3);
+  display: flex; justify-content: space-between; align-items: center;
+  transition: all 0.15s;
+}
+
+.transaction-item:hover {
+  background: var(--lav-1); border-color: var(--lav-2);
+}
+
+.transaction-info {
+  flex: 1;
+}
+
+.transaction-date {
+  font-size: 0.7rem; color: var(--text-3); margin-bottom: 2px;
+}
+
+.transaction-note {
+  font-size: 0.85rem; color: var(--text-1); font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.transaction-category {
+  font-size: 0.68rem; color: var(--text-3); font-weight: 500;
+}
+
+.transaction-amount {
+  font-size: 0.95rem; font-weight: 600;
+  margin-right: 8px;
+}
+
+.transaction-delete {
+  background: none; border: none; color: var(--text-4);
+  cursor: pointer; font-size: 0.8rem; transition: all 0.15s;
+}
+
+.transaction-delete:hover {
+  color: var(--pink-4);
+}
+
+.income-item .transaction-amount { color: var(--green-4); }
+.expense-item .transaction-amount { color: var(--pink-4); }
+
+.income-section { background: var(--green-1); }
+.expense-section { background: var(--pink-1); }
+
+.section-header {
+  padding: 12px; background: var(--green-4); color: white;
+  border-radius: var(--radius-sm); font-weight: 600; font-size: 0.85rem;
+  text-transform: uppercase; letter-spacing: 0.02em;
+}
+
+.expense-section .section-header {
+  background: var(--pink-4);
+}
+
+.empty-state {
+  text-align: center; padding: 24px;
+  color: var(--text-3); font-size: 0.85rem;
+}
+
+/* ══════════════════════════════════
+   TRANSACTION FORM
+══════════════════════════════════ */
+.transaction-form {
+  background: var(--cream); border-radius: var(--radius-sm);
+  padding: 16px; border: 1px solid var(--cream-3);
+}
+
+.form-group {
+  margin-bottom: 12px; display: flex; flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.75rem; font-weight: 600; color: var(--text-2);
+  text-transform: uppercase; letter-spacing: 0.02em;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cream-3);
+  background: var(--white); color: var(--text-1);
+  font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+  transition: all 0.15s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none; border-color: var(--lav-3);
+  background: var(--lav-1);
+}
+
+.form-group input::placeholder {
+  color: var(--text-4);
+}
+
+.form-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+
+.submit-btn {
+  width: 100%; padding: 10px; border-radius: var(--radius-sm);
+  border: none; background: linear-gradient(135deg, var(--lav-4), var(--pink-3));
+  color: white; font-weight: 600; cursor: pointer;
+  font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+  margin-top: 8px; transition: all 0.2s;
+  box-shadow: 0 3px 10px rgba(128,104,208,0.28);
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(128,104,208,0.36);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6; cursor: not-allowed; transform: none;
+}
+
+/* ══════════════════════════════════
+   GOALS SECTION
+══════════════════════════════════ */
+.goals-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
+}
+
+.goal-card {
+  background: var(--white); border-radius: var(--radius);
+  padding: 16px; border: 1px solid var(--cream-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.goal-title {
+  font-size: 0.95rem; font-weight: 600;
+  color: var(--text-1); margin-bottom: 8px;
+}
+
+.goal-progress-section {
+  margin-bottom: 12px;
+}
+
+.goal-progress-bar {
+  width: 100%; height: 10px; border-radius: 50px;
+  background: var(--cream-3); overflow: hidden; margin-bottom: 6px;
+}
+
+.goal-progress-fill {
+  height: 100%; background: linear-gradient(135deg, var(--lav-4), var(--pink-3));
+  transition: width 0.3s ease; border-radius: 50px;
+}
+
+.goal-stats {
+  display: flex; justify-content: space-between; font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.goal-amount { font-weight: 600; color: var(--text-2); }
+
+.goal-steps {
+  display: flex; flex-direction: column; gap: 6px; margin-top: 12px;
+}
+
+.goal-step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px; background: var(--cream); border-radius: 4px;
+  cursor: pointer; transition: all 0.15s;
+}
+
+.goal-step:hover { background: var(--lav-1); }
+
+.goal-step input[type="checkbox"] {
+  width: 16px; height: 16px; cursor: pointer;
+  accent-color: var(--lav-4);
+}
+
+.goal-step label {
+  flex: 1; cursor: pointer; font-size: 0.8rem;
+  color: var(--text-2); margin: 0;
+}
+
+.goal-step input[type="checkbox"]:checked + label {
+  text-decoration: line-through; color: var(--text-4);
+}
+
+.goal-delete-btn {
+  background: var(--pink-1); border: 1px solid var(--pink-2);
+  color: var(--pink-4); padding: 6px 12px; border-radius: 4px;
+  font-size: 0.7rem; cursor: pointer; transition: all 0.15s;
+  border: none; font-weight: 600;
+}
+
+.goal-delete-btn:hover {
+  background: var(--pink-2); color: var(--pink-5);
+}
+
+/* ══════════════════════════════════
+   ADD GOAL FORM
+══════════════════════════════════ */
+.add-goal-form {
+  display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;
+  align-items: end; margin-bottom: 16px;
+}
+
+.add-goal-form input {
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cream-3); background: var(--white);
+  font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+}
+
+.add-goal-form input:focus {
+  outline: none; border-color: var(--lav-3); background: var(--lav-1);
+}
+
+.add-goal-btn {
+  padding: 10px 16px; background: linear-gradient(135deg, var(--lav-4), var(--pink-3));
+  color: white; border: none; border-radius: var(--radius-sm);
+  cursor: pointer; font-weight: 600; font-size: 0.85rem;
+  font-family: 'Nunito', sans-serif; transition: all 0.2s;
+  box-shadow: 0 3px 10px rgba(128,104,208,0.28);
+}
+
+.add-goal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(128,104,208,0.36);
+}
+
+/* ══════════════════════════════════
+   ANALYTICS SECTION
+══════════════════════════════════ */
+.analytics-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;
+}
+
+.stat-card {
+  background: var(--white); border-radius: var(--radius-sm);
+  padding: 16px; border-left: 4px solid var(--lav-4);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
+}
+
+.stat-label {
+  font-size: 0.75rem; color: var(--text-3); text-transform: uppercase;
+  font-weight: 600; letter-spacing: 0.02em; margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 1.8rem; font-weight: 700; color: var(--text-1);
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.stat-card.income { border-left-color: var(--green-4); }
+.stat-card.income .stat-value { color: var(--green-4); }
+
+.stat-card.expense { border-left-color: var(--pink-4); }
+.stat-card.expense .stat-value { color: var(--pink-4); }
+
+.stat-card.savings { border-left-color: var(--lav-4); }
+.stat-card.savings .stat-value { color: var(--lav-4); }
+
+.chart-container {
+  background: var(--white); border-radius: var(--radius);
+  padding: 20px; border: 1px solid var(--cream-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-title {
+  font-size: 0.9rem; font-weight: 600; color: var(--text-1);
+  margin-bottom: 16px; text-transform: uppercase;
+}
+
+/* ══════════════════════════════════
+   MONTH NAVIGATION
+══════════════════════════════════ */
+.month-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; gap: 10px;
+}
+
+.month-nav-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid var(--cream-3); background: var(--white);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; color: var(--text-2); transition: all 0.18s;
+  box-shadow: var(--shadow-sm);
+}
+
+.month-nav-btn:hover { border-color: var(--lav-3); background: var(--lav-1); color: var(--lav-4); }
+
+.month-nav-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic; color: var(--text-1);
+  min-width: 180px; text-align: center; font-weight: 500;
+}
+
+.month-nav-today {
+  padding: 6px 14px; border-radius: 50px; border: 1.5px solid var(--cream-3);
+  background: var(--white); cursor: pointer; font-size: 0.76rem;
+  font-family: 'Nunito', sans-serif; font-weight: 600; color: var(--text-2);
+  transition: all 0.18s; box-shadow: var(--shadow-sm);
+}
+
+.month-nav-today:hover { border-color: var(--lav-3); background: var(--lav-1); color: var(--lav-4); }
+
+/* ══════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════ */
+@media (max-width: 768px) {
+  .finance-container { padding: 16px; }
+  .card { padding: 16px; }
+  .transactions-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .add-goal-form { grid-template-columns: 1fr; }
+  .goals-grid { grid-template-columns: 1fr; }
+  .analytics-grid { grid-template-columns: 1fr; }
+  .month-nav { flex-wrap: wrap; }
+  .month-nav-label { min-width: 140px; }
+
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     NAVIGATION
+══════════════════════════════════ -->
+<div class="nav">
+  <a href="planner.html" class="nav-brand">
+    <span class="nav-brand-dot"></span>
+    <span>Planner</span>
+  </a>
+  <div class="nav-links">
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="planner.html" class="nav-link">Planner</a>
+    <a href="finance.html" class="nav-link active">Finance</a>
+    <a href="goal.html" class="nav-link">Goals</a>
+    <a href="todo.html" class="nav-link">To-Do</a>
+  </div>
+  <div class="nav-user">
+    <div class="nav-avatar">💰</div>
+    <div>
+      <div class="nav-user-name">Finance</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE HEADER
+══════════════════════════════════ -->
+<div class="page-header">
+  <h1>Financial <span>Dashboard</span></h1>
+  <p>Manage Your Money</p>
+  <div class="header-line">
+    <div class="header-dot"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════ -->
+<div class="finance-container">
+
+  <!-- ACCOUNTS SECTION -->
+  <div class="card">
+    <div class="section-title">💳 Accounts & Balance</div>
+    <div class="balance-card">
+      <div class="balance-label">Total Balance</div>
+      <div class="balance-amount" id="totalBalance">$0.00</div>
+      <div class="balance-count" id="accountCount">0 accounts</div>
+    </div>
+    <div class="account-grid" id="accountsGrid"></div>
+    <button class="add-account-btn" onclick="showAddAccountDialog()">+ Add Account</button>
+  </div>
+
+  <!-- SAVINGS GOALS SECTION -->
+  <div class="card">
+    <div class="section-title">🎯 Savings Goals</div>
+    
+    <form class="add-goal-form" onsubmit="addGoal(event)">
+      <input type="text" id="goalName" placeholder="Goal name..." required>
+      <input type="number" id="goalTarget" placeholder="Target amount" min="0" step="100" required>
+      <button type="submit" class="add-goal-btn">Create Goal</button>
+    </form>
+
+    <!-- Goals Grid -->
+    <div class="goals-grid" id="goalsGrid"></div>
+  </div>
+
+  <!-- TRANSACTIONS SECTION -->
+  <div class="card">
+    <div class="section-title">💸 Transactions</div>
+
+    <!-- Month Navigation -->
+    <div class="month-nav">
+      <button class="month-nav-btn" onclick="prevMonth()">‹</button>
+      <div class="month-nav-label" id="currentMonthLabel">April 2024</div>
+      <button class="month-nav-btn" onclick="nextMonth()">›</button>
+      <button class="month-nav-today" onclick="goToCurrentMonth()">Today</button>
+    </div>
+    
+    <div class="transactions-grid">
+      <!-- Income Column -->
+      <div class="transaction-column">
+        <div class="section-header">📈 Income</div>
+        <div class="transaction-list income-section" id="incomeList">
+          <div class="empty-state">No income this month</div>
+        </div>
+      </div>
+
+      <!-- Expenses Column -->
+      <div class="transaction-column">
+        <div class="section-header" style="background: var(--pink-4);">📉 Expenses</div>
+        <div class="transaction-list expense-section" id="expenseList">
+          <div class="empty-state">No expenses this month</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction Form -->
+    <div class="transaction-form">
+      <div class="section-title">Add Transaction</div>
+      <form id="transactionForm" onsubmit="addTransaction(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="txDate" required>
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="txType" onchange="updateCategories()" required>
+              <option value="">Select Type</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="number" id="txAmount" step="0.01" min="0" placeholder="0.00" required>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="txCategory" required>
+              <option value="">Select Category</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Account</label>
+            <select id="txAccount" required>
+              <option value="">Select Account</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="txDescription" placeholder="Optional note">
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Add Transaction</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ANALYTICS SECTION -->
+  <div class="card">
+    <div class="section-title">📊 Analytics</div>
+    
+    <div class="analytics-grid">
+      <div class="stat-card income">
+        <div class="stat-label">Total Income</div>
+        <div class="stat-value" id="totalIncome">$0</div>
+      </div>
+      <div class="stat-card expense">
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-value" id="totalExpenses">$0</div>
+      </div>
+      <div class="stat-card savings">
+        <div class="stat-label">Net Savings</div>
+        <div class="stat-value" id="netSavings">$0</div>
+      </div>
+    </div>
+
+    <div class="chart-container" style="margin-top: 16px;">
+      <div class="chart-title">Monthly Overview</div>
+      <table id="monthlyChart" style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+        <thead style="background: var(--cream-2); border-bottom: 1px solid var(--cream-3);">
+          <tr>
+            <th style="padding: 8px; text-align: left;">Month</th>
+            <th style="padding: 8px; text-align: right;">Income</th>
+            <th style="padding: 8px; text-align: right;">Expenses</th>
+            <th style="padding: 8px; text-align: right;">Balance</th>
+          </tr>
+        </thead>
+        <tbody id="monthlyData">
+          <tr><td colspan="4" style="padding: 16px; text-align: center; color: var(--text-3);">No data yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════
+// DATA MANAGEMENT
+// ══════════════════════════════════
+
+const financeData = {
+  accounts: [],
+  transactions: [],
+  goals: [],
+  categories: {
+    income: [
+      { id: 1, name: 'Salary', color: '#48a872' },
+      { id: 2, name: 'Bonus', color: '#48a872' },
+      { id: 3, name: 'Investment', color: '#88c8a4' },
+      { id: 4, name: 'Gift', color: '#48a872' }
+    ],
+    expense: [
+      { id: 5, name: 'Food & Dining', color: '#d87040' },
+      { id: 6, name: 'Transportation', color: '#e89abf' },
+      { id: 7, name: 'Entertainment', color: '#8068d0' },
+      { id: 8, name: 'Utilities', color: '#4890d8' },
+      { id: 9, name: 'Shopping', color: '#f0a880' },
+      { id: 10, name: 'Other', color: '#c96090' }
+    ]
+  }
+};
+
+const nextId = {
+  account: 1,
+  transaction: 1,
+  goal: 1
+};
+
+// Month Navigation State
+let currentDate = new Date();
+
+// ══════════════════════════════════
+// INITIALIZATION
+// ══════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today's date as default
+  document.getElementById('txDate').valueAsDate = new Date();
+  
+  // Initialize with sample data
+  initializeSampleData();
+  
+  // Render UI
+  renderAccounts();
+  renderTransactions();
+  renderGoals();
+  updateAnalytics();
+  updateMonthDisplay();
+});
+
+function initializeSampleData() {
+  // Sample accounts
+  financeData.accounts = [
+    { id: 1, name: 'Checking', balance: 2500, color: '#8068d0' },
+    { id: 2, name: 'Savings', balance: 5000, color: '#48a872' },
+    { id: 3, name: 'Investment', balance: 8000, color: '#4890d8' }
+  ];
+  nextId.account = 4;
+
+  // Sample transactions - spread across different months
+  const now = new Date();
+  financeData.transactions = [
+    { id: 1, date: `${now.getFullYear()}-04-20`, type: 'income', amount: 3000, categoryId: 1, accountId: 1, description: 'Monthly Salary' },
+    { id: 2, date: `${now.getFullYear()}-04-19`, type: 'expense', amount: 45.50, categoryId: 5, accountId: 1, description: 'Lunch at restaurant' },
+    { id: 3, date: `${now.getFullYear()}-04-18`, type: 'expense', amount: 120, categoryId: 6, accountId: 1, description: 'Gas' },
+    { id: 4, date: `${now.getFullYear()}-04-17`, type: 'income', amount: 500, categoryId: 3, accountId: 2, description: 'Investment returns' },
+    { id: 5, date: `${now.getFullYear()}-03-15`, type: 'income', amount: 3000, categoryId: 1, accountId: 1, description: 'Monthly Salary' },
+    { id: 6, date: `${now.getFullYear()}-03-10`, type: 'expense', amount: 200, categoryId: 7, accountId: 1, description: 'Movie tickets' },
+    { id: 7, date: `${now.getFullYear()}-02-20`, type: 'income', amount: 3000, categoryId: 1, accountId: 1, description: 'Monthly Salary' },
+    { id: 8, date: `${now.getFullYear()}-02-14`, type: 'expense', amount: 150, categoryId: 5, accountId: 1, description: 'Valentine dinner' }
+  ];
+  nextId.transaction = 9;
+
+  // Sample goals
+  financeData.goals = [
+    { id: 1, name: 'Vacation Fund', target: 5000, current: 2000, steps: [] },
+    { id: 2, name: 'Emergency Fund', target: 10000, current: 5000, steps: [] },
+    { id: 3, name: 'New Laptop', target: 2000, current: 500, steps: [] }
+  ];
+  nextId.goal = 4;
+}
+
+// ══════════════════════════════════
+// MONTH NAVIGATION
+// ══════════════════════════════════
+
+function updateMonthDisplay() {
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+  const month = currentDate.getMonth();
+  const year = currentDate.getFullYear();
+  document.getElementById('currentMonthLabel').textContent = `${monthNames[month]} ${year}`;
+}
+
+function prevMonth() {
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  updateMonthDisplay();
+  renderTransactions();
+}
+
+function nextMonth() {
+  currentDate.setMonth(currentDate.getMonth() + 1);
+  updateMonthDisplay();
+  renderTransactions();
+}
+
+function goToCurrentMonth() {
+  currentDate = new Date();
+  updateMonthDisplay();
+  renderTransactions();
+}
+
+function getMonthTransactions() {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  return financeData.transactions.filter(t => {
+    const txDate = new Date(t.date);
+    return txDate.getFullYear() === year && txDate.getMonth() === month;
+  });
+}
+
+// ══════════════════════════════════
+// ACCOUNTS
+// ══════════════════════════════════
+
+function renderAccounts() {
+  const grid = document.getElementById('accountsGrid');
+  grid.innerHTML = '';
+
+  financeData.accounts.forEach(account => {
+    const card = document.createElement('div');
+    card.className = 'account-card';
+    card.style.borderLeftColor = account.color;
+    
+    card.innerHTML = `
+      <div class="account-name">${account.name}</div>
+      <div class="account-balance">$${account.balance.toFixed(2)}</div>
+      <div class="account-actions">
+        <button onclick="editAccount(${account.id})">Edit</button>
+        <button onclick="deleteAccount(${account.id})">Delete</button>
+      </div>
+    `;
+    
+    grid.appendChild(card);
+  });
+
+  // Update totals
+  const total = financeData.accounts.reduce((sum, acc) => sum + acc.balance, 0);
+  document.getElementById('totalBalance').textContent = `$${total.toFixed(2)}`;
+  document.getElementById('accountCount').textContent = `${financeData.accounts.length} ${financeData.accounts.length === 1 ? 'account' : 'accounts'}`;
+
+  // Update account select
+  const select = document.getElementById('txAccount');
+  select.innerHTML = '<option value="">Select Account</option>';
+  financeData.accounts.forEach(acc => {
+    const opt = document.createElement('option');
+    opt.value = acc.id;
+    opt.textContent = acc.name;
+    select.appendChild(opt);
+  });
+}
+
+function showAddAccountDialog() {
+  const name = prompt('Enter account name:');
+  if (name) {
+    const account = {
+      id: nextId.account++,
+      name: name,
+      balance: 0,
+      color: ['#8068d0', '#48a872', '#4890d8', '#d87040', '#e89abf'][Math.floor(Math.random() * 5)]
+    };
+    financeData.accounts.push(account);
+    renderAccounts();
+  }
+}
+
+function editAccount(id) {
+  const account = financeData.accounts.find(a => a.id === id);
+  const newName = prompt('Edit account name:', account.name);
+  if (newName) {
+    account.name = newName;
+    renderAccounts();
+  }
+}
+
+function deleteAccount(id) {
+  if (confirm('Delete this account?')) {
+    financeData.accounts = financeData.accounts.filter(a => a.id !== id);
+    renderAccounts();
+  }
+}
+
+// ══════════════════════════════════
+// TRANSACTIONS
+// ══════════════════════════════════
+
+function updateCategories() {
+  const type = document.getElementById('txType').value;
+  const select = document.getElementById('txCategory');
+  select.innerHTML = '<option value="">Select Category</option>';
+
+  const cats = financeData.categories[type] || [];
+  cats.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = cat.name;
+    select.appendChild(opt);
+  });
+}
+
+function getCategoryName(categoryId) {
+  for (let type in financeData.categories) {
+    const cat = financeData.categories[type].find(c => c.id === categoryId);
+    if (cat) return cat.name;
+  }
+  return 'Unknown';
+}
+
+function addTransaction(event) {
+  event.preventDefault();
+
+  const date = document.getElementById('txDate').value;
+  const type = document.getElementById('txType').value;
+  const amount = parseFloat(document.getElementById('txAmount').value);
+  const categoryId = parseInt(document.getElementById('txCategory').value);
+  const accountId = parseInt(document.getElementById('txAccount').value);
+  const description = document.getElementById('txDescription').value || 'Transaction';
+
+  if (!date || !type || !amount || !categoryId || !accountId) {
+    alert('Please fill all required fields');
+    return;
+  }
+
+  // Add transaction
+  const transaction = {
+    id: nextId.transaction++,
+    date,
+    type,
+    amount,
+    categoryId,
+    accountId,
+    description
+  };
+
+  financeData.transactions.push(transaction);
+
+  // Update account balance
+  const account = financeData.accounts.find(a => a.id === accountId);
+  if (account) {
+    if (type === 'income') {
+      account.balance += amount;
+    } else {
+      account.balance -= amount;
+    }
+  }
+
+  // Reset form
+  document.getElementById('transactionForm').reset();
+  document.getElementById('txDate').valueAsDate = new Date();
+
+  // Re-render
+  renderAccounts();
+  renderTransactions();
+  updateAnalytics();
+}
+
+function renderTransactions() {
+  const incomeList = document.getElementById('incomeList');
+  const expenseList = document.getElementById('expenseList');
+
+  // Get only transactions for the current month
+  const monthTransactions = getMonthTransactions();
+  const income = monthTransactions.filter(t => t.type === 'income').reverse();
+  const expenses = monthTransactions.filter(t => t.type === 'expense').reverse();
+
+  // Render income
+  incomeList.innerHTML = income.length === 0 
+    ? '<div class="empty-state">No income this month</div>'
+    : income.map(t => `
+      <div class="transaction-item income-item">
+        <div class="transaction-info">
+          <div class="transaction-date">${t.date}</div>
+          <div class="transaction-note">${t.description}</div>
+          <div class="transaction-category">${getCategoryName(t.categoryId)}</div>
+        </div>
+        <div class="transaction-amount">+$${t.amount.toFixed(2)}</div>
+        <button class="transaction-delete" onclick="deleteTransaction(${t.id})">✕</button>
+      </div>
+    `).join('');
+
+  // Render expenses
+  expenseList.innerHTML = expenses.length === 0 
+    ? '<div class="empty-state">No expenses this month</div>'
+    : expenses.map(t => `
+      <div class="transaction-item expense-item">
+        <div class="transaction-info">
+          <div class="transaction-date">${t.date}</div>
+          <div class="transaction-note">${t.description}</div>
+          <div class="transaction-category">${getCategoryName(t.categoryId)}</div>
+        </div>
+        <div class="transaction-amount">-$${t.amount.toFixed(2)}</div>
+        <button class="transaction-delete" onclick="deleteTransaction(${t.id})">✕</button>
+      </div>
+    `).join('');
+}
+
+function deleteTransaction(id) {
+  const transaction = financeData.transactions.find(t => t.id === id);
+  if (!transaction) return;
+
+  // Refund amount to account
+  const account = financeData.accounts.find(a => a.id === transaction.accountId);
+  if (account) {
+    if (transaction.type === 'income') {
+      account.balance -= transaction.amount;
+    } else {
+      account.balance += transaction.amount;
+    }
+  }
+
+  financeData.transactions = financeData.transactions.filter(t => t.id !== id);
+  renderAccounts();
+  renderTransactions();
+  updateAnalytics();
+}
+
+// ══════════════════════════════════
+// GOALS
+// ══════════════════════════════════
+
+function addGoal(event) {
+  event.preventDefault();
+
+  const name = document.getElementById('goalName').value;
+  const target = parseFloat(document.getElementById('goalTarget').value);
+
+  if (!name || !target || target <= 0) {
+    alert('Please enter valid goal details');
+    return;
+  }
+
+  const goal = {
+    id: nextId.goal++,
+    name,
+    target,
+    current: 0,
+    steps: []
+  };
+
+  financeData.goals.push(goal);
+
+  // Reset form
+  document.getElementById('goalName').value = '';
+  document.getElementById('goalTarget').value = '';
+
+  renderGoals();
+}
+
+function renderGoals() {
+  const grid = document.getElementById('goalsGrid');
+  grid.innerHTML = '';
+
+  financeData.goals.forEach(goal => {
+    const progress = (goal.current / goal.target) * 100;
+    
+    const card = document.createElement('div');
+    card.className = 'goal-card';
+    card.innerHTML = `
+      <div class="goal-title">${goal.name}</div>
+      
+      <div class="goal-progress-section">
+        <div class="goal-progress-bar">
+          <div class="goal-progress-fill" style="width: ${progress}%"></div>
+        </div>
+        <div class="goal-stats">
+          <span class="goal-amount">$${goal.current.toFixed(0)} / $${goal.target.toFixed(0)}</span>
+          <span>${progress.toFixed(0)}%</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <div style="font-size: 0.75rem; font-weight: 600; margin-bottom: 6px;">Update Progress</div>
+        <div style="display: flex; gap: 6px;">
+          <input type="number" id="goalAmount-${goal.id}" placeholder="Amount" min="0" step="100" style="flex: 1; padding: 6px; border: 1px solid var(--cream-3); border-radius: 4px;">
+          <button onclick="updateGoalProgress(${goal.id})" style="padding: 6px 12px; background: var(--lav-4); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: 600;">Update</button>
+        </div>
+      </div>
+
+      <button class="goal-delete-btn" onclick="deleteGoal(${goal.id})" style="width: 100%; margin-top: 12px;">Delete Goal</button>
+    `;
+    
+    grid.appendChild(card);
+  });
+}
+
+function updateGoalProgress(goalId) {
+  const goal = financeData.goals.find(g => g.id === goalId);
+  const input = document.getElementById(`goalAmount-${goalId}`);
+  const amount = parseFloat(input.value);
+
+  if (!input.value || amount < 0) {
+    alert('Please enter a valid amount');
+    return;
+  }
+
+  goal.current = Math.min(amount, goal.target);
+  input.value = '';
+  renderGoals();
+  updateAnalytics();
+}
+
+function deleteGoal(id) {
+  if (confirm('Delete this goal?')) {
+    financeData.goals = financeData.goals.filter(g => g.id !== id);
+    renderGoals();
+  }
+}
+
+// ══════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════
+
+function updateAnalytics() {
+  // Get current month transactions for stat cards
+  const monthTransactions = getMonthTransactions();
+  const monthIncome = monthTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const monthExpenses = monthTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const monthSavings = monthIncome - monthExpenses;
+
+  document.getElementById('totalIncome').textContent = `$${monthIncome.toFixed(0)}`;
+  document.getElementById('totalExpenses').textContent = `$${monthExpenses.toFixed(0)}`;
+  document.getElementById('netSavings').textContent = `$${monthSavings.toFixed(0)}`;
+
+  // All-time monthly chart
+  const monthlyData = {};
+  financeData.transactions.forEach(t => {
+    const month = t.date.substring(0, 7);
+    if (!monthlyData[month]) {
+      monthlyData[month] = { income: 0, expenses: 0 };
+    }
+    if (t.type === 'income') {
+      monthlyData[month].income += t.amount;
+    } else {
+      monthlyData[month].expenses += t.amount;
+    }
+  });
+
+  const tbody = document.getElementById('monthlyData');
+  if (Object.keys(monthlyData).length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding: 16px; text-align: center; color: var(--text-3);">No data yet</td></tr>';
+  } else {
+    tbody.innerHTML = Object.entries(monthlyData)
+      .sort()
+      .reverse()
+      .map(([month, data]) => {
+        const balance = data.income - data.expenses;
+        const monthName = new Date(month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+        return `
+          <tr style="border-bottom: 1px solid var(--cream-3); cursor: pointer;" onclick="navigateToMonth('${month}')">
+            <td style="padding: 12px;">${monthName}</td>
+            <td style="padding: 12px; text-align: right; color: var(--green-4); font-weight: 600;">$${data.income.toFixed(2)}</td>
+            <td style="padding: 12px; text-align: right; color: var(--pink-4); font-weight: 600;">$${data.expenses.toFixed(2)}</td>
+            <td style="padding: 12px; text-align: right; font-weight: 600; color: ${balance >= 0 ? 'var(--lav-4)' : 'var(--pink-4)'}"}>$${balance.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
+  }
+}
+
+function navigateToMonth(monthStr) {
+  const [year, month] = monthStr.split('-').map(Number);
+  currentDate = new Date(year, month - 1, 1);
+  updateMonthDisplay();
+  renderTransactions();
+  document.querySelector('.month-nav').scrollIntoView({ behavior: 'smooth' });
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✿ My Dashboard ✿</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<style>
+:root {
+  /* Pastel palette */
+  --pink-1:    #fce8f0;
+  --pink-2:    #f5c8dc;
+  --pink-3:    #e89abf;
+  --pink-4:    #c96090;
+  --pink-5:    #a03068;
+  --lav-1:     #f0ecfc;
+  --lav-2:     #dcd4f8;
+  --lav-3:     #b8a8ec;
+  --lav-4:     #8068d0;
+  --lav-5:     #5840a8;
+  --blue-1:    #e8f2fc;
+  --blue-2:    #c8dff8;
+  --blue-3:    #90bef0;
+  --blue-4:    #4890d8;
+  --blue-5:    #2068b0;
+  --green-1:   #e8f5ee;
+  --green-2:   #c4e4d0;
+  --green-3:   #88c8a4;
+  --green-4:   #48a872;
+  --green-5:   #2c7850;
+  --peach-1:   #fef0e8;
+  --peach-2:   #fad8c0;
+  --peach-3:   #f0a880;
+  --peach-4:   #d87040;
+  --cream:     #faf8f4;
+  --cream-2:   #f2ede4;
+  --cream-3:   #e0d8c8;
+  --cream-4:   #c8bca8;
+  --white:     #ffffff;
+  --text-1:    #2a2230;
+  --text-2:    #5a5070;
+  --text-3:    #9088a8;
+  --text-4:    #c0b8d0;
+
+  --shadow-sm:  0 2px 8px rgba(90,70,120,0.09);
+  --shadow-md:  0 4px 20px rgba(90,70,120,0.12);
+  --shadow-lg:  0 8px 40px rgba(90,70,120,0.14);
+  --radius-sm:  8px;
+  --radius:     14px;
+  --radius-lg:  22px;
+  --nav-h:      60px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--cream);
+  color: var(--text-1);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 0% 0%,   rgba(220,212,248,0.45) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(200,228,208,0.35) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%,  rgba(252,232,240,0.40) 0%, transparent 40%);
+}
+
+/* ── NAVIGATION ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--nav-h);
+  background: rgba(250,248,244,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--cream-3);
+  display: flex; align-items: center; padding: 0 28px; gap: 0;
+}
+.nav-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem; font-weight: 600;
+  color: var(--lav-4); letter-spacing: 0.04em;
+  margin-right: auto; text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-brand-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-3), var(--lav-3));
+}
+.nav-links { display: flex; gap: 3px; }
+.nav-link {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 50px;
+  border: 1px solid transparent; background: transparent;
+  font-family: 'Nunito', sans-serif; font-size: 0.83rem; font-weight: 500;
+  color: var(--text-2); cursor: pointer; transition: all 0.2s;
+  text-decoration: none; letter-spacing: 0.01em;
+}
+.nav-link:hover { background: var(--cream-2); color: var(--lav-4); }
+.nav-link.active {
+  background: var(--lav-1); border-color: var(--lav-2);
+  color: var(--lav-4); font-weight: 600;
+}
+.nav-user {
+  display: flex; align-items: center; gap: 7px;
+  margin-left: 12px; padding: 4px 12px 4px 4px;
+  background: var(--pink-1); border: 1px solid var(--pink-2);
+  border-radius: 50px; cursor: pointer; transition: all 0.18s;
+}
+.nav-user:hover { background: var(--pink-2); }
+.nav-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-3), var(--lav-3));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 700; color: white; flex-shrink: 0;
+}
+.nav-user-name { font-size: 0.78rem; color: var(--pink-4); font-weight: 500; }
+.nav-signout {
+  font-size: 0.68rem; color: var(--text-3);
+  background: none; border: none; cursor: pointer; transition: color 0.15s;
+}
+.nav-signout:hover { color: var(--pink-4); }
+
+/* ── AUTH OVERLAY ── */
+.auth-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: linear-gradient(145deg, rgba(240,236,252,0.95), rgba(252,232,240,0.95));
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+}
+.auth-overlay.hidden { display: none; }
+.auth-card {
+  background: var(--white); border-radius: var(--radius-lg);
+  padding: 44px 40px 36px; max-width: 380px; width: 90%;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--lav-2);
+  animation: authPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes authPop {
+  from { opacity:0; transform:scale(0.88) translateY(16px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.auth-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-2), var(--lav-2));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 18px; font-size: 1.4rem;
+}
+.auth-card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem; font-weight: 600; color: var(--lav-4);
+  text-align: center; margin-bottom: 6px;
+}
+.auth-card p {
+  font-size: 0.82rem; color: var(--text-3); text-align: center;
+  line-height: 1.6; margin-bottom: 28px;
+}
+.auth-form { display: flex; flex-direction: column; gap: 10px; }
+.auth-input {
+  width: 100%; padding: 11px 15px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cream-3); background: var(--cream);
+  font-family: 'Nunito', sans-serif; font-size: 0.88rem;
+  color: var(--text-1); outline: none; transition: border 0.18s;
+}
+.auth-input:focus { border-color: var(--lav-3); background: var(--white); }
+.auth-input::placeholder { color: var(--text-4); }
+.auth-submit-btn {
+  width: 100%; padding: 12px; border-radius: var(--radius-sm); border: none;
+  background: linear-gradient(135deg, var(--lav-4), var(--pink-3));
+  color: white; font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(128,104,208,0.30); letter-spacing: 0.02em; margin-top: 4px;
+}
+.auth-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(128,104,208,0.38); }
+.auth-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.auth-toggle {
+  font-size: 0.78rem; color: var(--text-3); text-align: center;
+  background: none; border: none; cursor: pointer; font-family: 'Nunito', sans-serif;
+  transition: color 0.15s; margin-top: 4px;
+}
+.auth-toggle span { color: var(--lav-4); font-weight: 600; }
+.auth-error {
+  font-size: 0.76rem; color: var(--pink-4);
+  background: var(--pink-1); border: 1px solid var(--pink-2);
+  border-radius: var(--radius-sm); padding: 8px 12px;
+  display: none; line-height: 1.45;
+}
+.auth-error.show { display: block; }
+
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 998;
+  background: rgba(250,248,244,0.85);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.loading-overlay.hidden { display: none; }
+.loading-ring {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2.5px solid var(--lav-2); border-top-color: var(--lav-4);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.3s ease both; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.page-header { text-align: center; padding: 36px 20px 20px; }
+.page-header::after {
+  content: ''; display: block; width: 60px; height: 1px;
+  background: var(--cream-3); margin: 14px auto 0; border-radius: 8px;
+}
+.page-header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--text-1);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.page-header p { color: var(--text-3); font-size: 0.8rem; margin-top: 5px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; padding: 0 24px 60px; max-width: 1200px; margin: 0 auto; }
+
+.card {
+  background: var(--white); border-radius: var(--radius);
+  border: 1px solid var(--cream-3); box-shadow: var(--shadow-sm);
+  padding: 24px; transition: all 0.3s ease; cursor: pointer;
+}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.card-icon { font-size: 2.4rem; margin-bottom: 12px; display: block; }
+.card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 600; color: var(--text-1); margin-bottom: 8px; }
+.card p { color: var(--text-2); font-size: 0.85rem; line-height: 1.6; margin-bottom: 14px; }
+.card-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.stat { background: var(--cream); border-radius: 50px; padding: 6px 12px; font-size: 0.75rem; color: var(--text-2); display: flex; align-items: center; gap: 5px; }
+.stat-num { font-weight: 600; color: var(--lav-4); }
+
+.welcome-card { grid-column: 1 / -1; text-align: center; background: linear-gradient(135deg, var(--lav-1), var(--pink-1)); border-color: var(--lav-2); }
+.welcome-card .card-icon { animation: float 3s ease-in-out infinite; }
+.welcome-card h3 { color: var(--lav-4); }
+.welcome-card p { color: var(--text-2); }
+
+.todo-card .card-icon { color: var(--pink-4); }
+.goal-card .card-icon { color: var(--lav-4); }
+.planner-card .card-icon { color: var(--peach-4); }
+
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* Responsive */
+@media (max-width: 820px) {
+  .dashboard-grid { grid-template-columns: 1fr; padding: 0 14px 50px; }
+  .nav { padding: 0 14px; }
+  .nav-brand span:not(.brand-deco) { display: none; }
+  .nav-link { padding: 7px 12px; gap: 4px; }
+  .nav-link span:last-child { display: none; }
+  .nav-user span { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- AUTH -->
+<div class="auth-overlay hidden" id="auth-overlay">
+  <div class="auth-card">
+    <span class="auth-deco">🌿</span>
+    <h2 id="auth-title">Welcome Back ♡</h2>
+    <p id="auth-subtitle">Sign in to sync your planner across all devices.</p>
+    <div class="auth-form">
+      <div class="auth-error" id="auth-error"></div>
+      <input class="auth-input" type="email"    id="auth-email"    placeholder="Email address" autocomplete="email">
+      <input class="auth-input" type="password" id="auth-password" placeholder="Password"      autocomplete="current-password">
+      <input class="auth-input" type="password" id="auth-confirm"  placeholder="Confirm password" style="display:none" autocomplete="new-password">
+      <button class="auth-submit-btn" id="auth-submit-btn" onclick="handleAuthSubmit()">Sign In</button>
+      <button class="auth-toggle" id="auth-toggle-btn" onclick="toggleAuthMode()">
+        Don't have an account? <span>Create one</span>
+      </button>
+    </div>
+    <p class="auth-note">Your data is stored privately in Firestore and only accessible by you.</p>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index2.html" class="nav-brand"><span class="brand-deco">✿</span><span>My Planner</span></a>
+  <div class="nav-links">
+    <a href="dashboard.html" class="nav-link active"><span>🏠</span><span>Dashboard</span></a>
+    <a href="todo.html" class="nav-link"><span>✅</span><span>To-Do</span></a>
+    <a href="goal.html" class="nav-link"><span>🎯</span><span>Goals</span></a>
+    <a href="finance.html" class="nav-link"><span>💰</span><span>Finance</span></a>
+    <a href="planner.html" class="nav-link"><span>📅</span><span>Planner</span></a>
+  </div>
+  <div class="nav-user" id="nav-user" style="display:none">
+    <span id="nav-avatar-initial" style="width:28px;height:28px;border-radius:50%;background:var(--grass-pale);color:var(--grass-deep);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0;"></span>
+    <span id="nav-name"></span>
+    <button class="nav-signout" onclick="signOut()" title="Sign out">✕</button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <h1><span>✿</span> Welcome Back <span>✿</span></h1>
+    <p>let's make today amazing ♡</p>
+  </div>
+  <div class="dashboard-grid">
+    <div class="card welcome-card">
+      <span class="card-icon">🌸</span>
+      <h3>Hello there!</h3>
+      <p>Ready to organize your day? Check out your progress below or jump into your tasks, goals, and planner.</p>
+    </div>
+    <div class="card todo-card" onclick="window.location.href='todo.html'">
+      <span class="card-icon">✅</span>
+      <h3>To-Do Board</h3>
+      <p>Manage your tasks across work, personal, and school categories with a kanban-style board.</p>
+      <div class="card-stats">
+        <div class="stat">📝 <span class="stat-num" id="todo-total">0</span> total</div>
+        <div class="stat">🌿 <span class="stat-num" id="todo-done">0</span> done</div>
+        <div class="stat">🎀 <span class="stat-num" id="todo-pct">0%</span> complete</div>
+      </div>
+    </div>
+    <div class="card goal-card" onclick="window.location.href='goal.html'">
+      <span class="card-icon">🎯</span>
+      <h3>Goals</h3>
+      <p>Set and track your monthly, weekly, and daily goals to stay focused and motivated.</p>
+      <div class="card-stats">
+        <div class="stat">📅 <span class="stat-num" id="goal-monthly">0</span> monthly</div>
+        <div class="stat">📆 <span class="stat-num" id="goal-weekly">0</span> weekly</div>
+        <div class="stat">📝 <span class="stat-num" id="goal-daily">0</span> daily</div>
+      </div>
+    </div>
+    <div class="card planner-card" onclick="window.location.href='planner.html'">
+      <span class="card-icon">📅</span>
+      <h3>Planner</h3>
+      <p>Plan your week with time slots, reminders, and integrated goal tracking.</p>
+      <div class="card-stats">
+        <div class="stat">⏰ <span class="stat-num" id="planner-slots">0</span> slots</div>
+        <div class="stat">🔔 <span class="stat-num" id="planner-reminders">0</span> reminders</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDhNIhPG5yOWkk40VMsEGe6WhI_HjjDXxs",
+  authDomain: "imthebestdotplannner.firebaseapp.com",
+  projectId: "imthebestdotplannner",
+  storageBucket: "imthebestdotplannner.firebasestorage.app",
+  messagingSenderId: "600432148406",
+  appId: "1:600432148406:web:080690db2504b94f918b17",
+  measurementId: "G-95QBN038M8"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ── DATA ── */
+let currentUser = null;
+let unsubTodo = null, unsubGoal = null, unsubPlanner = null;
+
+let todoData = { work: { new: [], prog: [], done: [] }, personal: { new: [], prog: [], done: [] }, school: { new: [], prog: [], done: [] } };
+let goalData = { monthly: [], weekly: [], daily: [] };
+let plannerData = {};
+
+/* ── AUTH ── */
+let authMode = 'signin';
+
+function toggleAuthMode() {
+  authMode = authMode === 'signin' ? 'signup' : 'signin';
+  const s = authMode === 'signup';
+  document.getElementById('auth-title').textContent = s ? 'Create Account ♡' : 'Welcome Back ♡';
+  document.getElementById('auth-subtitle').textContent = s ? 'Create an account to sync your planner across all devices.' : 'Sign in to sync your planner across all devices.';
+  document.getElementById('auth-submit-btn').textContent = s ? 'Create Account' : 'Sign In';
+  document.getElementById('auth-confirm').style.display = s ? '' : 'none';
+  document.getElementById('auth-toggle-btn').innerHTML = s ? 'Already have an account? <span>Sign in</span>' : "Don't have an account? <span>Create one</span>";
+  document.getElementById('auth-error').classList.remove('show');
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.classList.add('show');
+}
+
+async function handleAuthSubmit() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pw = document.getElementById('auth-password').value;
+  const conf = document.getElementById('auth-confirm').value;
+  document.getElementById('auth-error').classList.remove('show');
+  if (!email || !pw) { showAuthError('Please enter your email and password.'); return; }
+  if (authMode === 'signup' && pw !== conf) { showAuthError("Passwords don't match."); return; }
+  if (pw.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+  const btn = document.getElementById('auth-submit-btn');
+  btn.disabled = true; btn.textContent = authMode === 'signup' ? 'Creating…' : 'Signing in…';
+  try {
+    if (authMode === 'signup') await auth.createUserWithEmailAndPassword(email, pw);
+    else await auth.signInWithEmailAndPassword(email, pw);
+  } catch (err) {
+    btn.disabled = false; btn.textContent = authMode === 'signup' ? 'Create Account' : 'Sign In';
+    const msgs = {
+      'auth/user-not-found': 'No account found with that email.',
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/email-already-in-use': 'An account with this email already exists.',
+      'auth/invalid-email': 'Please enter a valid email address.',
+      'auth/weak-password': 'Password is too weak.',
+      'auth/too-many-requests': 'Too many attempts. Please wait.',
+      'auth/invalid-credential': 'Incorrect email or password.',
+    };
+    showAuthError(msgs[err.code] || `Error: ${err.message}`);
+  }
+}
+
+function signOut() {
+  if (confirm('Sign out? ♡')) auth.signOut();
+}
+
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  document.getElementById('loading-overlay').classList.add('hidden');
+  if (user) {
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('nav-user').style.display = 'flex';
+    document.getElementById('nav-avatar-initial').textContent = (user.email || '?')[0].toUpperCase();
+    document.getElementById('nav-name').textContent = user.email?.split('@')[0] || '';
+    setupFirestoreListeners(user.uid);
+  } else {
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    document.getElementById('nav-user').style.display = 'none';
+    todoData = { work: { new: [], prog: [], done: [] }, personal: { new: [], prog: [], done: [] }, school: { new: [], prog: [], done: [] } };
+    goalData = { monthly: [], weekly: [], daily: [] };
+    plannerData = {};
+    updateDashboardStats();
+  }
+});
+
+function setupFirestoreListeners(uid) {
+  unsubTodo = db.collection('users').doc(uid).collection('planner').doc('todo').onSnapshot(snap => {
+    if (snap.exists) {
+      const d = snap.data();
+      todoData = { work: d.work || { new: [], prog: [], done: [] }, personal: d.personal || { new: [], prog: [], done: [] }, school: d.school || { new: [], prog: [], done: [] } };
+    }
+    updateDashboardStats();
+  }, err => console.error('Todo listener:', err));
+
+  unsubGoal = db.collection('users').doc(uid).collection('planner').doc('goals').onSnapshot(snap => {
+    if (snap.exists) {
+      const d = snap.data();
+      goalData = { monthly: d.monthly || [], weekly: d.weekly || [], daily: d.daily || [] };
+    }
+    updateDashboardStats();
+  }, err => console.error('Goal listener:', err));
+
+  unsubPlanner = db.collection('users').doc(uid).collection('planner').doc('planner').onSnapshot(snap => {
+    if (snap.exists) plannerData = snap.data();
+    updateDashboardStats();
+  }, err => console.error('Planner listener:', err));
+}
+
+function updateDashboardStats() {
+  // Todo stats
+  let total = 0, done = 0;
+  Object.values(todoData).forEach(cat => { Object.values(cat).forEach(arr => { total += arr.length; }); done += cat.done?.length || 0; });
+  document.getElementById('todo-total').textContent = total;
+  document.getElementById('todo-done').textContent = done;
+  document.getElementById('todo-pct').textContent = total ? Math.round(done / total * 100) + '%' : '0%';
+
+  // Goal stats
+  document.getElementById('goal-monthly').textContent = goalData.monthly?.length || 0;
+  document.getElementById('goal-weekly').textContent = goalData.weekly?.length || 0;
+  document.getElementById('goal-daily').textContent = goalData.daily?.length || 0;
+
+  // Planner stats
+  let slots = 0, reminders = 0;
+  Object.values(plannerData).forEach(day => {
+    if (Array.isArray(day)) {
+      slots += day.length;
+      reminders += day.filter(slot => slot.reminder).length;
+    }
+  });
+  document.getElementById('planner-slots').textContent = slots;
+  document.getElementById('planner-reminders').textContent = reminders;
+}
+</script>
+</body>
+</html>

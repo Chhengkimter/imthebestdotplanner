@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✿ My Todo Board ✿</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink-deep: #e8527a;
+    --pink-mid: #f07fa0;
+    --pink-soft: #f9b8cb;
+    --pink-pale: #fde8ef;
+    --pink-blush: #fff0f4;
+    --pink-cream: #fff7f9;
+    --rose-dark: #c93f66;
+    --gold: #f5c842;
+    --text-dark: #3a1a26;
+    --text-mid: #7a4059;
+    --text-light: #b07090;
+    --white: #ffffff;
+    --shadow-soft: 0 4px 24px rgba(232,82,122,0.10);
+    --shadow-card: 0 2px 12px rgba(180,60,100,0.10);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--pink-blush);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(249,184,203,0.45) 0%, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(232,82,122,0.13) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(255,240,244,0.6) 0%, transparent 70%);
+  }
+
+  /* ── HEADER ───────────────────────────────── */
+  header {
+    text-align: center;
+    padding: 44px 20px 30px;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    display: block;
+    width: 120px; height: 3px;
+    background: linear-gradient(90deg, var(--pink-soft), var(--pink-deep), var(--pink-soft));
+    border-radius: 9px;
+    margin: 18px auto 0;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--pink-deep);
+    letter-spacing: 0.01em;
+    text-shadow: 0 2px 18px rgba(232,82,122,0.18);
+  }
+  header p {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    font-weight: 300;
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+  .deco { font-size: 1.1em; }
+
+  /* ── TAB BAR ──────────────────────────────── */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 20px 28px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 10px 28px;
+    border-radius: 50px;
+    border: 2px solid var(--pink-soft);
+    background: var(--white);
+    color: var(--text-mid);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    letter-spacing: 0.03em;
+    box-shadow: var(--shadow-card);
+  }
+  .tab-btn:hover {
+    border-color: var(--pink-mid);
+    background: var(--pink-pale);
+    transform: translateY(-2px);
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--pink-deep), var(--pink-mid));
+    border-color: transparent;
+    color: var(--white);
+    box-shadow: 0 6px 20px rgba(232,82,122,0.35);
+    transform: translateY(-2px);
+  }
+  .tab-btn .tab-icon { margin-right: 6px; }
+
+  /* ── BOARD ────────────────────────────────── */
+  .board-wrapper {
+    padding: 0 24px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .board {
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    animation: fadeUp 0.35s ease both;
+  }
+  .board.active { display: grid; }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(14px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* ── COLUMN ───────────────────────────────── */
+  .col {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 0;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1.5px solid rgba(249,184,203,0.5);
+  }
+  .col-header {
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1.5px solid var(--pink-pale);
+  }
+  .col-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+  }
+  .col-count {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 600;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* Column accent colors */
+  .col-new  .col-header { background: linear-gradient(135deg,#fff0f4,#fde8ef); }
+  .col-new  .col-header h3 { color: #c93f66; }
+  .col-new  .col-header .dot { background: #f9b8cb; }
+  .col-new  .col-count { background: var(--pink-soft); color: var(--rose-dark); }
+
+  .col-prog .col-header { background: linear-gradient(135deg,#fff4e8,#fde8d0); }
+  .col-prog .col-header h3 { color: #d4703a; }
+  .col-prog .col-header .dot { background: #f7c98a; }
+  .col-prog .col-count { background: #f7c98a; color: #8a4010; }
+
+  .col-done .col-header { background: linear-gradient(135deg,#edfff5,#d2f5e5); }
+  .col-done .col-header h3 { color: #2a9b62; }
+  .col-done .col-header .dot { background: #86e0b4; }
+  .col-done .col-count { background: #86e0b4; color: #145c38; }
+
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .tasks-list {
+    padding: 14px 14px 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 80px;
+  }
+
+  /* ── TASK CARD ────────────────────────────── */
+  .task-card {
+    background: var(--pink-cream);
+    border: 1.5px solid var(--pink-pale);
+    border-radius: var(--radius-sm);
+    padding: 13px 14px;
+    position: relative;
+    transition: all 0.2s ease;
+    cursor: default;
+    animation: popIn 0.25s ease both;
+  }
+  .task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(232,82,122,0.12);
+    border-color: var(--pink-soft);
+  }
+  .col-prog .task-card { background: #fffbf5; border-color: #f7e8d0; }
+  .col-done .task-card { background: #f5fffe; border-color: #cef0e4; opacity: 0.85; }
+  .col-done .task-text { text-decoration: line-through; color: var(--text-light); }
+
+  @keyframes popIn {
+    from { opacity:0; transform: scale(0.93); }
+    to   { opacity:1; transform: scale(1); }
+  }
+
+  .task-text {
+    font-size: 0.88rem;
+    color: var(--text-dark);
+    line-height: 1.45;
+    font-weight: 400;
+    padding-right: 20px;
+    word-break: break-word;
+  }
+  .task-actions {
+    position: absolute;
+    top: 8px; right: 8px;
+    display: flex;
+    gap: 3px;
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+  .task-card:hover .task-actions { opacity: 1; }
+  .task-btn {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .btn-move { background: var(--pink-pale); color: var(--pink-deep); }
+  .btn-move:hover { background: var(--pink-soft); transform: scale(1.1); }
+  .btn-del { background: #ffe0e0; color: #c0405a; }
+  .btn-del:hover { background: #ffb8b8; transform: scale(1.1); }
+
+  .task-meta {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .priority-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .p-high { background:#ffe0ea; color:#c03060; }
+  .p-mid  { background:#fff0d0; color:#a06010; }
+  .p-low  { background:#e0f8ee; color:#1a8050; }
+
+  /* ── ADD TASK FORM ────────────────────────── */
+  .add-form {
+    padding: 10px 14px 14px;
+    border-top: 1.5px solid var(--pink-pale);
+    background: var(--pink-blush);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .col-prog .add-form { background: #fffaf4; border-top-color: #f7e8d0; }
+  .col-done .add-form { background: #f5fffe; border-top-color: #cef0e4; }
+
+  .add-form input[type="text"] {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--pink-soft);
+    background: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.83rem;
+    color: var(--text-dark);
+    outline: none;
+    transition: border 0.18s;
+  }
+  .add-form input[type="text"]:focus { border-color: var(--pink-deep); }
+  .add-form input::placeholder { color: var(--text-light); }
+
+  .add-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .priority-select {
+    flex: 1;
+    padding: 7px 8px;
+    border-radius: 8px;
+    border: 1.5px solid var(--pink-soft);
+    background: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    outline: none;
+    cursor: pointer;
+  }
+  .add-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, var(--pink-deep), var(--pink-mid));
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(232,82,122,0.3);
+  }
+  .add-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(232,82,122,0.4);
+  }
+
+  /* ── STATS BAR ────────────────────────────── */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    padding: 0 24px 28px;
+    flex-wrap: wrap;
+  }
+  .stat-chip {
+    background: var(--white);
+    border-radius: 50px;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-mid);
+    box-shadow: var(--shadow-card);
+    border: 1.5px solid var(--pink-pale);
+  }
+  .stat-chip .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--pink-deep);
+    font-weight: 700;
+  }
+
+  /* ── EMPTY STATE ──────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 24px 10px;
+    color: var(--text-light);
+    font-size: 0.82rem;
+  }
+  .empty-state .empty-icon { font-size: 1.6rem; display:block; margin-bottom:6px; }
+
+  /* ── RESPONSIVE ───────────────────────────── */
+  @media (max-width: 768px) {
+    .board { grid-template-columns: 1fr; }
+    .board-wrapper { padding: 0 14px 50px; }
+  }
+  @media (max-width: 560px) {
+    .tabs { gap: 7px; }
+    .tab-btn { padding: 8px 18px; font-size: 0.85rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="deco">✿</span> My Todo Board <span class="deco">✿</span></h1>
+  <p>stay cute, stay organized ♡</p>
+</header>
+
+<!-- STATS -->
+<div class="stats-bar" id="statsBar">
+  <div class="stat-chip">✨ <span class="stat-num" id="stat-total">0</span> total tasks</div>
+  <div class="stat-chip">🌸 <span class="stat-num" id="stat-done">0</span> completed</div>
+  <div class="stat-chip">🎀 <span class="stat-num" id="stat-pct">0%</span> done</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('work')"><span class="tab-icon">💼</span>Work</button>
+  <button class="tab-btn" onclick="switchTab('personal')"><span class="tab-icon">🌷</span>Personal</button>
+  <button class="tab-btn" onclick="switchTab('school')"><span class="tab-icon">📚</span>School</button>
+</div>
+
+<!-- BOARDS -->
+<div class="board-wrapper">
+
+  <!-- WORK -->
+  <div class="board active" id="board-work">
+    <div class="col col-new">
+      <div class="col-header"><span class="dot"></span><h3>✦ New Task</h3><span class="col-count" id="count-work-new">0</span></div>
+      <div class="tasks-list" id="list-work-new"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a new task..." id="input-work-new">
+        <div class="add-row">
+          <select class="priority-select" id="pri-work-new">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('work','new')">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="col col-prog">
+      <div class="col-header"><span class="dot"></span><h3>⟳ In Progress</h3><span class="col-count" id="count-work-prog">0</span></div>
+      <div class="tasks-list" id="list-work-prog"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a task..." id="input-work-prog">
+        <div class="add-row">
+          <select class="priority-select" id="pri-work-prog">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('work','prog')">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="col col-done">
+      <div class="col-header"><span class="dot"></span><h3>✓ Done</h3><span class="col-count" id="count-work-done">0</span></div>
+      <div class="tasks-list" id="list-work-done"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a task..." id="input-work-done">
+        <div class="add-row">
+          <select class="priority-select" id="pri-work-done">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('work','done')">+ Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONAL -->
+  <div class="board" id="board-personal">
+    <div class="col col-new">
+      <div class="col-header"><span class="dot"></span><h3>✦ New Task</h3><span class="col-count" id="count-personal-new">0</span></div>
+      <div class="tasks-list" id="list-personal-new"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a new task..." id="input-personal-new">
+        <div class="add-row">
+          <select class="priority-select" id="pri-personal-new">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('personal','new')">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="col col-prog">
+      <div class="col-header"><span class="dot"></span><h3>⟳ In Progress</h3><span class="col-count" id="count-personal-prog">0</span></div>
+      <div class="tasks-list" id="list-personal-prog"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a task..." id="input-personal-prog">
+        <div class="add-row">
+          <select class="priority-select" id="pri-personal-prog">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('personal','prog')">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="col col-done">
+      <div class="col-header"><span class="dot"></span><h3>✓ Done</h3><span class="col-count" id="count-personal-done">0</span></div>
+      <div class="tasks-list" id="list-personal-done"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a task..." id="input-personal-done">
+        <div class="add-row">
+          <select class="priority-select" id="pri-personal-done">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('personal','done')">+ Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHOOL -->
+  <div class="board" id="board-school">
+    <div class="col col-new">
+      <div class="col-header"><span class="dot"></span><h3>✦ New Task</h3><span class="col-count" id="count-school-new">0</span></div>
+      <div class="tasks-list" id="list-school-new"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a new task..." id="input-school-new">
+        <div class="add-row">
+          <select class="priority-select" id="pri-school-new">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('school','new')">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="col col-prog">
+      <div class="col-header"><span class="dot"></span><h3>⟳ In Progress</h3><span class="col-count" id="count-school-prog">0</span></div>
+      <div class="tasks-list" id="list-school-prog"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a task..." id="input-school-prog">
+        <div class="add-row">
+          <select class="priority-select" id="pri-school-prog">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('school','prog')">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="col col-done">
+      <div class="col-header"><span class="dot"></span><h3>✓ Done</h3><span class="col-count" id="count-school-done">0</span></div>
+      <div class="tasks-list" id="list-school-done"><div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div></div>
+      <div class="add-form">
+        <input type="text" placeholder="Add a task..." id="input-school-done">
+        <div class="add-row">
+          <select class="priority-select" id="pri-school-done">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn" onclick="addTask('school','done')">+ Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /board-wrapper -->
+
+<script>
+const CATEGORIES = ['work','personal','school'];
+const COLS = ['new','prog','done'];
+const COL_LABELS = { new:'new', prog:'prog', done:'done' };
+const NEXT = { new:'prog', prog:'done' };
+const PREV = { done:'prog', prog:'new' };
+
+// State
+let tasks = JSON.parse(localStorage.getItem('cuteTasks') || '{}');
+CATEGORIES.forEach(c => {
+  if(!tasks[c]) tasks[c] = { new:[], prog:[], done:[] };
+});
+
+function save() { localStorage.setItem('cuteTasks', JSON.stringify(tasks)); }
+
+function addTask(cat, col) {
+  const inp = document.getElementById(`input-${cat}-${col}`);
+  const pri = document.getElementById(`pri-${cat}-${col}`);
+  const text = inp.value.trim();
+  if(!text) { inp.focus(); return; }
+  tasks[cat][col].push({ id: Date.now(), text, priority: pri.value });
+  inp.value = '';
+  save();
+  renderAll();
+}
+
+function moveTask(cat, col, id, dir) {
+  const target = dir === 'fwd' ? NEXT[col] : PREV[col];
+  if(!target) return;
+  const idx = tasks[cat][col].findIndex(t => t.id === id);
+  if(idx < 0) return;
+  const [task] = tasks[cat][col].splice(idx, 1);
+  tasks[cat][target].push(task);
+  save();
+  renderAll();
+}
+
+function deleteTask(cat, col, id) {
+  tasks[cat][col] = tasks[cat][col].filter(t => t.id !== id);
+  save();
+  renderAll();
+}
+
+function renderAll() {
+  CATEGORIES.forEach(cat => COLS.forEach(col => renderCol(cat, col)));
+  updateStats();
+}
+
+function renderCol(cat, col) {
+  const list = document.getElementById(`list-${cat}-${col}`);
+  const count = document.getElementById(`count-${cat}-${col}`);
+  const arr = tasks[cat][col];
+  count.textContent = arr.length;
+  if(arr.length === 0) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-icon">🌸</span>no tasks yet!</div>`;
+    return;
+  }
+  list.innerHTML = arr.map(t => {
+    const priClass = t.priority === 'high' ? 'p-high' : t.priority === 'low' ? 'p-low' : 'p-mid';
+    const priLabel = t.priority === 'high' ? 'High' : t.priority === 'low' ? 'Low' : 'Medium';
+    const hasFwd = !!NEXT[col], hasBck = !!PREV[col];
+    return `
+      <div class="task-card">
+        <div class="task-text">${escHtml(t.text)}</div>
+        <div class="task-meta">
+          <span class="priority-badge ${priClass}">${priLabel}</span>
+        </div>
+        <div class="task-actions">
+          ${hasBck ? `<button class="task-btn btn-move" onclick="moveTask('${cat}','${col}',${t.id},'bck')" title="Move back">◀</button>` : ''}
+          ${hasFwd ? `<button class="task-btn btn-move" onclick="moveTask('${cat}','${col}',${t.id},'fwd')" title="Move forward">▶</button>` : ''}
+          <button class="task-btn btn-del" onclick="deleteTask('${cat}','${col}',${t.id})" title="Delete">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  let total = 0, done = 0;
+  CATEGORIES.forEach(cat => {
+    COLS.forEach(col => { total += tasks[cat][col].length; });
+    done += tasks[cat]['done'].length;
+  });
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-pct').textContent = total ? Math.round(done/total*100)+'%' : '0%';
+}
+
+function switchTab(cat) {
+  document.querySelectorAll('.board').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`board-${cat}`).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Enter key support
+document.querySelectorAll('.add-form input').forEach(inp => {
+  inp.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      const [,cat,col] = inp.id.split('-');
+      addTask(cat, col);
+    }
+  });
+});
+
+renderAll();
+</script>
+</body>
+</html>
