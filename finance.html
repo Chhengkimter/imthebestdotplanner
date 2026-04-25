@@ -224,19 +224,59 @@ body {
 .add-goal-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(128,104,208,0.36); }
 
 /* ── ANALYTICS ── */
-.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
-.stat-card { background: var(--white); border-radius: var(--radius-sm); padding: 16px; border-left: 4px solid var(--lav-4); box-shadow: var(--shadow-sm); }
-.stat-label { font-size: 0.75rem; color: var(--text-3); text-transform: uppercase; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 8px; }
-.stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text-1); font-family: 'Cormorant Garamond', serif; }
-.stat-card.income { border-left-color: var(--green-4); }
-.stat-card.income .stat-value { color: var(--green-4); }
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stat-card {
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  border-left: 3px solid var(--lav-4);
+}
+.stat-label {
+  font-size: 0.68rem; color: var(--text-3);
+  text-transform: uppercase; font-weight: 600;
+  letter-spacing: 0.04em; margin-bottom: 4px;
+}
+.stat-value {
+  font-size: 1.3rem; font-weight: 700;
+  color: var(--text-1);
+  font-family: 'Cormorant Garamond', serif;
+}
+.stat-card.income  { border-left-color: var(--green-4); }
+.stat-card.income .stat-value  { color: var(--green-4); }
 .stat-card.expense { border-left-color: var(--pink-4); }
 .stat-card.expense .stat-value { color: var(--pink-4); }
 .stat-card.savings { border-left-color: var(--lav-4); }
 .stat-card.savings .stat-value { color: var(--lav-4); }
-.chart-container { background: var(--white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--cream-3); box-shadow: var(--shadow-sm); }
-.chart-title { font-size: 0.9rem; font-weight: 600; color: var(--text-1); margin-bottom: 16px; text-transform: uppercase; }
 
+.analytics-layout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+}
+.pie-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.pie-legend {
+  display: flex; flex-direction: column; gap: 6px; width: 100%;
+}
+.pie-legend-item {
+  display: flex; align-items: center; gap: 7px;
+}
+.pie-swatch {
+  width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+}
+.pie-legend-label { font-size: 0.72rem; color: var(--text-2); font-weight: 600; }
+.pie-legend-sub   { font-size: 0.68rem; color: var(--text-3); }
+
+@media (max-width: 768px) {
+  .analytics-grid   { grid-template-columns: 1fr; }
+  .analytics-layout { grid-template-columns: 1fr; justify-items: center; }
+}
 /* ── MONTH NAV ── */
 .month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 10px; }
 .month-nav-btn { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--cream-3); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: var(--text-2); transition: all 0.18s; box-shadow: var(--shadow-sm); }
@@ -268,12 +308,12 @@ body {
 
 <!-- NAV -->
 <nav class="nav">
-  <a href="index2.html" class="nav-brand">
+  <a href="special.html" class="nav-brand">
     <div class="nav-brand-dot"></div>
     My Planner
   </a>
   <div class="nav-links">
-    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="index.html" class="nav-link">Dashboard</a>
     <a href="todo.html"      class="nav-link">To-Do</a>
     <a href="goal.html"      class="nav-link">Goals</a>
     <a href="finance.html"   class="nav-link active">Finance</a>
@@ -294,20 +334,7 @@ body {
 </div>
 
 <!-- MAIN CONTENT -->
-<div class="finance-container" id="mainContent" style="display:none">
-
-  <!-- ACCOUNTS -->
-  <div class="card">
-    <div class="section-title">💳 Accounts & Balance</div>
-    <div class="balance-card">
-      <div class="balance-label">Total Balance</div>
-      <div class="balance-amount" id="totalBalance">$0.00</div>
-      <div class="balance-count" id="accountCount">0 accounts</div>
-    </div>
-    <div class="account-grid" id="accountsGrid"></div>
-    <div style="height: 15px;"></div>
-    <button class="add-account-btn" onclick="showAddAccountDialog()">+ Add Account</button>
-  </div>
+<div class="finance-container" id="mainContent" style="display:none">  
 
   <!-- SAVINGS GOALS -->
   <div class="card">
@@ -319,6 +346,53 @@ body {
     </form>
     <div class="goals-grid" id="goalsGrid"></div>
   </div>
+
+ <div class="card">
+  <div class="section-title">📊 Analytics</div>
+  <div class="analytics-layout">
+    <!-- Pie chart -->
+    <div class="pie-wrap">
+      <svg id="pieChart" width="150" height="150" viewBox="0 0 150 150"
+           style="filter: drop-shadow(0 4px 12px rgba(90,70,120,0.15))"></svg>
+      <div class="pie-legend" id="pieLegend"></div>
+    </div>
+    <!-- Stat cards -->
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="analytics-grid">
+        <div class="stat-card income">
+          <div class="stat-label">Income</div>
+          <div class="stat-value" id="totalIncome">$0</div>
+        </div>
+        <div class="stat-card expense">
+          <div class="stat-label">Expenses</div>
+          <div class="stat-value" id="totalExpenses">$0</div>
+        </div>
+      </div>
+      <div class="stat-card savings" style="border-radius: var(--radius-sm); padding: 12px 14px; background: var(--lav-1); border: 1px solid var(--lav-2); border-left: 3px solid var(--lav-4);">
+        <div class="stat-label">Net Savings this month</div>
+        <div class="stat-value" id="netSavings">$0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All-time table -->
+  <div class="chart-container" style="margin-top: 16px;">
+    <div class="chart-title">Monthly Overview (All Time)</div>
+    <table id="monthlyChart" style="width:100%;font-size:0.85rem;border-collapse:collapse;">
+      <thead style="background:var(--cream-2);border-bottom:1px solid var(--cream-3);">
+        <tr>
+          <th style="padding:8px;text-align:left">Month</th>
+          <th style="padding:8px;text-align:right">Income</th>
+          <th style="padding:8px;text-align:right">Expenses</th>
+          <th style="padding:8px;text-align:right">Balance</th>
+        </tr>
+      </thead>
+      <tbody id="monthlyData">
+        <tr><td colspan="4" style="padding:16px;text-align:center;color:var(--text-3)">No data yet</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
   <!-- TRANSACTIONS -->
   <div class="card">
@@ -390,39 +464,17 @@ body {
     </div>
   </div>
 
-  <!-- ANALYTICS -->
+  <!-- ACCOUNTS -->
   <div class="card">
-    <div class="section-title">📊 Analytics</div>
-    <div class="analytics-grid">
-      <div class="stat-card income">
-        <div class="stat-label">Total Income (this month)</div>
-        <div class="stat-value" id="totalIncome">$0</div>
-      </div>
-      <div class="stat-card expense">
-        <div class="stat-label">Total Expenses (this month)</div>
-        <div class="stat-value" id="totalExpenses">$0</div>
-      </div>
-      <div class="stat-card savings">
-        <div class="stat-label">Net Savings (this month)</div>
-        <div class="stat-value" id="netSavings">$0</div>
-      </div>
+    <div class="section-title">💳 Accounts & Balance</div>
+    <div class="balance-card">
+      <div class="balance-label">Total Balance</div>
+      <div class="balance-amount" id="totalBalance">$0.00</div>
+      <div class="balance-count" id="accountCount">0 accounts</div>
     </div>
-    <div class="chart-container" style="margin-top: 16px;">
-      <div class="chart-title">Monthly Overview (All Time)</div>
-      <table id="monthlyChart" style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
-        <thead style="background: var(--cream-2); border-bottom: 1px solid var(--cream-3);">
-          <tr>
-            <th style="padding: 8px; text-align: left;">Month</th>
-            <th style="padding: 8px; text-align: right;">Income</th>
-            <th style="padding: 8px; text-align: right;">Expenses</th>
-            <th style="padding: 8px; text-align: right;">Balance</th>
-          </tr>
-        </thead>
-        <tbody id="monthlyData">
-          <tr><td colspan="4" style="padding: 16px; text-align: center; color: var(--text-3);">No data yet</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="account-grid" id="accountsGrid"></div>
+    <div style="height: 15px;"></div>
+    <button class="add-account-btn" onclick="showAddAccountDialog()">+ Add Account</button>
   </div>
 
 </div><!-- /finance-container -->
@@ -571,6 +623,85 @@ function setupFirestoreListeners() {
     }, err => console.error('Goals listener error:', err));
 
   unsubscribers = [unsubAccounts, unsubTx, unsubGoals];
+}
+
+function renderPieChart() {
+  const monthTx  = getMonthTransactions();
+  const income   = monthTx.filter(t => t.type === 'income').reduce((s,t)  => s + t.amount, 0);
+  const expenses = monthTx.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
+  const savings  = Math.max(income - expenses, 0);
+  const total    = income + expenses + savings;
+
+  const svg    = document.getElementById('pieChart');
+  const legend = document.getElementById('pieLegend');
+  if (!svg || !legend) return;
+  svg.innerHTML = legend.innerHTML = '';
+
+  const slices = [
+    { label: 'Income',   value: income,   color: 'var(--green-4)', hex: '#48a872' },
+    { label: 'Expenses', value: expenses, color: 'var(--pink-4)',  hex: '#c96090' },
+    { label: 'Savings',  value: savings,  color: 'var(--lav-4)',   hex: '#8068d0' },
+  ].filter(s => s.value > 0);
+
+  if (!total || !slices.length) {
+    svg.innerHTML = `<text x="75" y="80" text-anchor="middle" fill="#c0b8d0" font-size="11" font-family="Nunito,sans-serif">No data</text>`;
+    return;
+  }
+
+  const cx = 75, cy = 75, r = 60, hole = 36;
+  let angle = -Math.PI / 2;
+
+  slices.forEach(slice => {
+    const ratio = slice.value / total;
+    const sweep = ratio * 2 * Math.PI;
+    const x1  = cx + r    * Math.cos(angle),         y1  = cy + r    * Math.sin(angle);
+    const x2  = cx + r    * Math.cos(angle + sweep), y2  = cy + r    * Math.sin(angle + sweep);
+    const ix1 = cx + hole * Math.cos(angle),         iy1 = cy + hole * Math.sin(angle);
+    const ix2 = cx + hole * Math.cos(angle + sweep), iy2 = cy + hole * Math.sin(angle + sweep);
+    const large = sweep > Math.PI ? 1 : 0;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d',
+      `M${ix1} ${iy1} L${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${ix2} ${iy2} A${hole} ${hole} 0 ${large} 0 ${ix1} ${iy1}Z`);
+    path.setAttribute('fill', slice.hex);
+    path.setAttribute('stroke', '#faf8f4');
+    path.setAttribute('stroke-width', '2.5');
+    path.style.cssText = 'transition:opacity 0.15s,transform 0.15s;transform-origin:75px 75px;cursor:default';
+    path.addEventListener('mouseenter', () => { path.style.opacity = '0.82'; path.style.transform = 'scale(1.04)'; });
+    path.addEventListener('mouseleave', () => { path.style.opacity = '1';    path.style.transform = 'scale(1)'; });
+    svg.appendChild(path);
+    angle += sweep;
+  });
+
+  // Center label
+  const netLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  netLabel.setAttribute('x', cx); netLabel.setAttribute('y', cy - 4);
+  netLabel.setAttribute('text-anchor', 'middle');
+  netLabel.setAttribute('font-size', '10'); netLabel.setAttribute('fill', '#9088a8');
+  netLabel.setAttribute('font-family', 'Nunito,sans-serif'); netLabel.textContent = 'NET';
+  svg.appendChild(netLabel);
+
+  const netVal = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  netVal.setAttribute('x', cx); netVal.setAttribute('y', cy + 10);
+  netVal.setAttribute('text-anchor', 'middle');
+  netVal.setAttribute('font-size', '13'); netVal.setAttribute('fill', '#8068d0');
+  netVal.setAttribute('font-family', 'Cormorant Garamond,serif'); netVal.setAttribute('font-weight', '600');
+  netVal.textContent = `$${(income - expenses).toFixed(0)}`;
+  svg.appendChild(netVal);
+
+  // Legend
+  slices.forEach(slice => {
+    const pct = ((slice.value / total) * 100).toFixed(1);
+    const item = document.createElement('div');
+    item.className = 'pie-legend-item';
+    item.innerHTML = `
+      <div class="pie-swatch" style="background:${slice.hex}"></div>
+      <div>
+        <div class="pie-legend-label">${slice.label}</div>
+        <div class="pie-legend-sub">$${slice.value.toFixed(0)} · ${pct}%</div>
+      </div>`;
+    legend.appendChild(item);
+  });
 }
 
 // ══════════════════════════════════
@@ -875,6 +1006,8 @@ function updateAnalytics() {
           <td style="padding:12px;text-align:right;font-weight:600;color:${balColor}">$${bal.toFixed(2)}</td>
         </tr>`;
     }).join('');
+
+    renderPieChart();
 }
 
 function navigateToMonth(monthStr) {
