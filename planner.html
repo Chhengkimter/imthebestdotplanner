@@ -541,7 +541,7 @@ textarea.text-input { resize: vertical; min-height: 80px; line-height: 1.6; }
   border-radius: var(--radius); border: 1px solid var(--cream-3);
   box-shadow: var(--shadow-sm); overflow: hidden;
 }
-.week-grid-scroll { overflow-y: auto; max-height: calc(100vh - 240px); }
+.week-grid-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 .week-grid {
   display: grid; grid-template-columns: 48px repeat(7, 1fr);
 }
@@ -750,7 +750,7 @@ textarea.text-input { resize: vertical; min-height: 80px; line-height: 1.6; }
 <div class="view active" id="view-year">
   <div class="page-header">
     <h1>My <span>2026</span> Planner</h1>
-    <p>plan your year · month by month</p>
+    <p>brink by brink!</p>
     <div class="header-line"><div class="header-dot"></div><div class="header-dot"></div><div class="header-dot"></div></div>
   </div>
 
@@ -871,7 +871,7 @@ textarea.text-input { resize: vertical; min-height: 80px; line-height: 1.6; }
 <div class="view" id="view-week">
   <div class="page-header">
     <h1>Weekly <span>Planner</span></h1>
-    <p>schedule your days · own your week</p>
+    <p>keep the grain going</p>
     <div class="header-line"><div class="header-dot"></div><div class="header-dot"></div><div class="header-dot"></div></div>
   </div>
 
@@ -898,6 +898,11 @@ textarea.text-input { resize: vertical; min-height: 80px; line-height: 1.6; }
           <div style="display:flex;gap:6px;">
             <input type="time" id="inp-reminder-time" class="text-input" style="width:90px;flex-shrink:0;">
             <input type="text"  id="inp-reminder-text" class="text-input" placeholder="Reminder...">
+            <select id="inp-reminder-pri" class="text-input" style="width:80px;flex-shrink:0;">
+              <option value="l">Low</option>
+              <option value="m" selected>Med</option>
+              <option value="h">High</option>
+            </select>
           </div>
           <button class="pill-btn primary" style="width:100%;" onclick="addWeekReminder()">Add Reminder</button>
         </div>
@@ -946,7 +951,7 @@ const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
 const DAYS   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const MSHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const HOURS  = Array.from({length:17},(_,i)=>i+6); // 6am–10pm
+const HOURS  = Array.from({length:21},(_,i)=>i+4); // 4am–12am
 
 const MONTH_COLORS = [
   ['#fce8f0','#c96090'], // Jan  pink
@@ -1386,9 +1391,11 @@ function renderWeekSidebar() {
   const reminders=md.reminders||[];
   rl.innerHTML=reminders.map(r=>`
     <div class="reminder-item">
+      <div class="wgoal-check${r.done?' done':''}" onclick="toggleWeekReminder(${r.id})"></div>
       <span class="reminder-time">${r.time||''}</span>
-      <span class="wgoal-text">${esc(r.text)}</span>
+      <span class="wgoal-text${r.done?' done':''}">${esc(r.text)}</span>
       <span class="pri-badge ${r.pri||'m'}">${({h:'High',m:'Med',l:'Low'})[r.pri||'m']}</span>
+      <button class="wgoal-del" onclick="deleteWeekReminder(${r.id})">✕</button>
     </div>`).join('') || `<p style="font-size:0.75rem;color:var(--text-4);padding:4px 0;">No reminders yet</p>`;
 
   // Weekly goals
@@ -1405,11 +1412,25 @@ function renderWeekSidebar() {
 function addWeekReminder() {
   const time=document.getElementById('inp-reminder-time').value;
   const text=document.getElementById('inp-reminder-text').value.trim();
+  const pri=document.getElementById('inp-reminder-pri').value;
   if (!text) { document.getElementById('inp-reminder-text').focus(); return; }
   if (CM===null) return;
-  (data[CY][CM].reminders=data[CY][CM].reminders||[]).push({id:Date.now(),text,time,pri:'m'});
+  (data[CY][CM].reminders=data[CY][CM].reminders||[]).push({id:Date.now(),text,time,pri,done:false});
   document.getElementById('inp-reminder-time').value='';
   document.getElementById('inp-reminder-text').value='';
+  document.getElementById('inp-reminder-pri').value='m';
+  renderMonthReminders(); renderWeekSidebar(); save();
+}
+
+function toggleWeekReminder(id) {
+  if(CM===null)return;
+  const r=data[CY][CM].reminders?.find(r=>r.id===id); if(r) r.done=!r.done;
+  renderWeekSidebar(); save();
+}
+
+function deleteWeekReminder(id) {
+  if(CM===null)return;
+  data[CY][CM].reminders=data[CY][CM].reminders?.filter(r=>r.id!==id)||[];
   renderMonthReminders(); renderWeekSidebar(); save();
 }
 
