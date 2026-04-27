@@ -454,6 +454,156 @@ body {
 @media (max-width: 600px) {
   .nav-links .nav-link span:last-child { display: none; }
 }
+
+/* ══════════════════════════════════
+   SCHOOL EXTRAS
+══════════════════════════════════ */
+#school-extras { display: none; padding: 0 24px 60px; max-width: 1200px; margin: 0 auto; }
+#school-extras.active { display: block; }
+
+.school-section { margin-bottom: 36px; }
+.school-section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.school-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem; font-weight: 600; color: var(--text-1);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.school-section-title span { color: var(--lav-4); font-style: italic; }
+
+.filter-bar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  background: var(--white); border-radius: var(--radius);
+  padding: 10px 14px; border: 1px solid var(--cream-3);
+  box-shadow: var(--shadow-sm); margin-bottom: 14px;
+}
+.filter-bar label {
+  font-size: 0.72rem; color: var(--text-3);
+  font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.filter-select {
+  padding: 5px 10px; border-radius: 50px;
+  border: 1.5px solid var(--cream-3); background: var(--cream);
+  font-family: 'Nunito', sans-serif; font-size: 0.78rem;
+  color: var(--text-2); outline: none; cursor: pointer; transition: border 0.18s;
+}
+.filter-select:focus { border-color: var(--lav-3); }
+
+.add-entry-bar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  background: var(--white); border-radius: var(--radius);
+  padding: 12px 14px; border: 1px solid var(--cream-3);
+  box-shadow: var(--shadow-sm); margin-bottom: 14px;
+}
+.add-entry-bar input[type="text"],
+.add-entry-bar input[type="date"] {
+  padding: 7px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cream-3); background: var(--cream);
+  font-family: 'Nunito', sans-serif; font-size: 0.82rem;
+  color: var(--text-1); outline: none; transition: border 0.18s;
+}
+.add-entry-bar input:focus { border-color: var(--lav-3); background: var(--white); }
+.add-entry-bar input[type="text"] { flex: 1; min-width: 120px; }
+.add-entry-bar input[type="date"] { min-width: 140px; }
+.add-entry-bar select {
+  padding: 7px 10px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cream-3); background: var(--cream);
+  font-family: 'Nunito', sans-serif; font-size: 0.78rem;
+  color: var(--text-2); outline: none; cursor: pointer;
+}
+
+.school-table-wrap {
+  background: var(--white); border-radius: var(--radius);
+  border: 1px solid var(--cream-3); box-shadow: var(--shadow-sm); overflow-x: auto;
+}
+.school-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+.school-table thead tr {
+  background: linear-gradient(135deg, var(--lav-1), #ede8fb);
+  border-bottom: 1.5px solid var(--lav-2);
+}
+.school-table th {
+  padding: 11px 14px; text-align: left;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.85rem; font-weight: 600;
+  color: var(--lav-5); letter-spacing: 0.05em;
+  text-transform: uppercase; white-space: nowrap;
+}
+.school-table td {
+  padding: 10px 14px; border-bottom: 1px solid var(--cream-2);
+  color: var(--text-2); vertical-align: middle;
+}
+.school-table tbody tr:last-child td { border-bottom: none; }
+.school-table tbody tr:hover td { background: var(--cream); }
+
+.deadline-badge {
+  font-size: 0.74rem; padding: 3px 9px;
+  border-radius: 20px; font-weight: 600; white-space: nowrap;
+}
+.dl-overdue { background: var(--pink-1);  color: var(--pink-4); }
+.dl-today   { background: #fff3cd;         color: #856404; }
+.dl-soon    { background: var(--peach-1); color: var(--peach-4); }
+.dl-future  { background: var(--green-1); color: var(--green-4); }
+.dl-none    { background: var(--cream-2); color: var(--text-4); }
+
+.tbl-btn { padding: 3px 9px; border-radius: 5px; border: none; font-size: 0.7rem; cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 600; transition: all 0.15s; }
+.tbl-del { background: var(--pink-1); color: var(--pink-4); }
+.tbl-del:hover { background: var(--pink-2); }
+.empty-table { text-align: center; padding: 28px; color: var(--text-4); font-size: 0.82rem; }
+
+.btn-manage-subj {
+  padding: 6px 14px; border-radius: 50px;
+  border: 1.5px solid var(--lav-2); background: var(--lav-1);
+  color: var(--lav-4); font-family: 'Nunito', sans-serif;
+  font-size: 0.76rem; font-weight: 600;
+  cursor: pointer; transition: all 0.18s; white-space: nowrap;
+}
+.btn-manage-subj:hover { background: var(--lav-2); }
+
+/* Manage Subjects Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(42,34,48,0.35); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-overlay.hidden { display: none; }
+.modal-card {
+  background: var(--white); border-radius: var(--radius-lg);
+  padding: 28px 26px 22px; max-width: 360px; width: 90%;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--lav-2);
+  animation: authPop 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem; font-weight: 600; color: var(--lav-4);
+  margin-bottom: 16px; letter-spacing: 0.04em;
+}
+.subject-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; max-height: 200px; overflow-y: auto; }
+.subject-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--lav-1); border-radius: var(--radius-sm);
+  padding: 7px 12px; font-size: 0.84rem; color: var(--lav-5);
+  border: 1px solid var(--lav-2);
+}
+.subject-add-row { display: flex; gap: 7px; margin-bottom: 4px; }
+.subject-input {
+  flex: 1; padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cream-3); background: var(--cream);
+  font-family: 'Nunito', sans-serif; font-size: 0.84rem; outline: none; color: var(--text-1);
+}
+.subject-input:focus { border-color: var(--lav-3); }
+.modal-close-btn {
+  width: 100%; padding: 9px; border-radius: var(--radius-sm); border: none;
+  background: var(--lav-4); color: white;
+  font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; margin-top: 10px; transition: all 0.18s;
+}
+.modal-close-btn:hover { background: var(--lav-5); }
+
+@media (max-width: 768px) {
+  #school-extras { padding: 0 14px 50px; }
+}
 </style>
 </head>
 <body>
@@ -657,6 +807,101 @@ body {
     </div>
 
   </div>
+  <!-- SCHOOL EXTRAS: Assignments + Projects -->
+<div id="school-extras">
+
+  <!-- ── ASSIGNMENTS ── -->
+  <div class="school-section">
+    <div class="school-section-header">
+      <div class="school-section-title">✦ <span>Assignments</span></div>
+      <button class="btn-manage-subj" onclick="openSubjectsModal()">⚙ Manage Subjects</button>
+    </div>
+
+    <div class="add-entry-bar">
+      <input type="text"  id="asgn-name"     placeholder="Assignment name…">
+      <select             id="asgn-subject"></select>
+      <input type="date"  id="asgn-deadline">
+      <select             id="asgn-priority">
+        <option value="high">High</option>
+        <option value="mid" selected>Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <button class="add-btn" onclick="addAssignment()">+ Add</button>
+    </div>
+
+    <div class="filter-bar">
+      <label>Sort:</label>
+      <select class="filter-select" id="flt-asgn-sort" onchange="renderAssignments()">
+        <option value="deadline">Closest Deadline</option>
+        <option value="priority">Priority</option>
+      </select>
+      <label>Subject:</label>
+      <select class="filter-select" id="flt-asgn-subject" onchange="renderAssignments()">
+        <option value="">All</option>
+      </select>
+      <label>Priority:</label>
+      <select class="filter-select" id="flt-asgn-priority" onchange="renderAssignments()">
+        <option value="">All</option>
+        <option value="high">High</option>
+        <option value="mid">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+
+    <div class="school-table-wrap">
+      <table class="school-table">
+        <thead><tr><th>Assignment</th><th>Subject</th><th>Deadline</th><th>Priority</th><th></th></tr></thead>
+        <tbody id="asgn-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── PROJECTS ── -->
+  <div class="school-section">
+    <div class="school-section-header">
+      <div class="school-section-title">◎ <span>Projects</span></div>
+    </div>
+
+    <div class="add-entry-bar">
+      <input type="text"  id="proj-name"     placeholder="Project name…">
+      <select             id="proj-subject"></select>
+      <input type="date"  id="proj-deadline">
+      <button class="add-btn" onclick="addProject()">+ Add</button>
+    </div>
+
+    <div class="filter-bar">
+      <label>Sort:</label>
+      <select class="filter-select" id="flt-proj-sort" onchange="renderProjects()">
+        <option value="deadline">Closest Deadline</option>
+      </select>
+      <label>Subject:</label>
+      <select class="filter-select" id="flt-proj-subject" onchange="renderProjects()">
+        <option value="">All</option>
+      </select>
+    </div>
+
+    <div class="school-table-wrap">
+      <table class="school-table">
+        <thead><tr><th>Project</th><th>Subject</th><th>Deadline</th><th></th></tr></thead>
+        <tbody id="proj-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MANAGE SUBJECTS MODAL -->
+<div class="modal-overlay hidden" id="subjects-modal">
+  <div class="modal-card">
+    <div class="modal-title">✿ Manage Subjects</div>
+    <div class="subject-list" id="subject-list"></div>
+    <div class="subject-add-row">
+      <input class="subject-input" type="text" id="new-subject-inp" placeholder="New subject name…">
+      <button class="add-btn" onclick="addSubject()">+ Add</button>
+    </div>
+    <button class="modal-close-btn" onclick="closeSubjectsModal()">Done</button>
+  </div>
+</div>
 </div>
 
 <script>
@@ -768,6 +1013,8 @@ function setupFirestoreListeners(uid) {
       }
       renderTodoAll();
     }, err => console.error('Todo listener:', err));
+
+  setupSchoolListener(uid);
 }
 
 /* ══════════════════════════════════
@@ -799,6 +1046,10 @@ function switchTodoTab(cat, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('board-'+cat).classList.add('active');
   btn.classList.add('active');
+  // Show/hide school extras
+  const extras = document.getElementById('school-extras');
+  if (cat === 'school') extras.classList.add('active');
+  else extras.classList.remove('active');
 }
 function addTodo(cat, col) {
   const inp = document.getElementById('inp-'+cat+'-'+col);
@@ -875,6 +1126,195 @@ document.addEventListener('keydown', e => {
 });
 
 renderTodoAll();
+
+/* ══════════════════════════════════
+   SCHOOL DATA & FIRESTORE
+══════════════════════════════════ */
+let schoolData = { subjects: ['Math','Science','English','History'], assignments: [], projects: [] };
+let unsubSchool = null;
+
+function setupSchoolListener(uid) {
+  if (unsubSchool) unsubSchool();
+  unsubSchool = db.collection('users').doc(uid).collection('planner').doc('school')
+    .onSnapshot(snap => {
+      if (snap.exists) {
+        const d = snap.data();
+        schoolData.subjects    = d.subjects    || ['Math','Science','English','History'];
+        schoolData.assignments = d.assignments || [];
+        schoolData.projects    = d.projects    || [];
+      }
+      renderSchoolAll();
+    }, err => console.error('School listener:', err));
+}
+
+async function saveSchool() {
+  if (!currentUser) return; showSync(false);
+  try {
+    await db.collection('users').doc(currentUser.uid).collection('planner').doc('school').set(schoolData);
+    showSync(true);
+  } catch(e) { console.error(e); }
+}
+
+/* ── SUBJECTS ── */
+function openSubjectsModal() {
+  renderSubjectList();
+  document.getElementById('subjects-modal').classList.remove('hidden');
+}
+function closeSubjectsModal() {
+  document.getElementById('subjects-modal').classList.add('hidden');
+  populateSubjectSelects();
+  renderAssignments();
+  renderProjects();
+}
+function renderSubjectList() {
+  const list = document.getElementById('subject-list');
+  if (!schoolData.subjects.length) {
+    list.innerHTML = '<div style="color:var(--text-4);font-size:0.8rem;text-align:center;padding:8px">No subjects yet</div>';
+    return;
+  }
+  list.innerHTML = schoolData.subjects.map((s,i) => `
+    <div class="subject-item">
+      <span>${esc(s)}</span>
+      <button class="tbl-btn tbl-del" onclick="removeSubject(${i})">✕</button>
+    </div>`).join('');
+}
+function addSubject() {
+  const inp = document.getElementById('new-subject-inp');
+  const val = inp.value.trim(); if (!val) return;
+  if (!schoolData.subjects.includes(val)) { schoolData.subjects.push(val); saveSchool(); }
+  inp.value = ''; renderSubjectList();
+}
+function removeSubject(i) {
+  schoolData.subjects.splice(i,1); saveSchool(); renderSubjectList();
+}
+function populateSubjectSelects() {
+  const opts    = schoolData.subjects.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  const allOpts = `<option value="">All</option>` + opts;
+  document.getElementById('asgn-subject').innerHTML      = opts || '<option value="">— no subjects —</option>';
+  document.getElementById('proj-subject').innerHTML      = opts || '<option value="">— no subjects —</option>';
+  document.getElementById('flt-asgn-subject').innerHTML  = allOpts;
+  document.getElementById('flt-proj-subject').innerHTML  = allOpts;
+}
+
+/* ── DEADLINE UTILS ── */
+function fmtDate(dl) {
+  return new Date(dl+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function deadlineBadge(dl) {
+  if (!dl) return '<span class="deadline-badge dl-none">No date</span>';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d    = new Date(dl+'T00:00:00');
+  const diff = Math.round((d - today) / 86400000);
+  if (diff < 0)   return `<span class="deadline-badge dl-overdue">Overdue · ${fmtDate(dl)}</span>`;
+  if (diff === 0) return `<span class="deadline-badge dl-today">Today · ${fmtDate(dl)}</span>`;
+  if (diff <= 3)  return `<span class="deadline-badge dl-soon">In ${diff}d · ${fmtDate(dl)}</span>`;
+  return `<span class="deadline-badge dl-future">${fmtDate(dl)}</span>`;
+}
+
+/* ── ASSIGNMENTS ── */
+function addAssignment() {
+  const name = document.getElementById('asgn-name').value.trim();
+  if (!name) { document.getElementById('asgn-name').focus(); return; }
+  schoolData.assignments.push({
+    id:       Date.now(),
+    name,
+    subject:  document.getElementById('asgn-subject').value,
+    deadline: document.getElementById('asgn-deadline').value,
+    priority: document.getElementById('asgn-priority').value
+  });
+  document.getElementById('asgn-name').value = '';
+  document.getElementById('asgn-deadline').value = '';
+  saveSchool(); renderAssignments();
+}
+function deleteAssignment(id) {
+  schoolData.assignments = schoolData.assignments.filter(a => a.id !== id);
+  saveSchool(); renderAssignments();
+}
+function getFilteredAssignments() {
+  const fSubj = document.getElementById('flt-asgn-subject')?.value || '';
+  const fPri  = document.getElementById('flt-asgn-priority')?.value || '';
+  const fSort = document.getElementById('flt-asgn-sort')?.value || 'deadline';
+  let arr = [...schoolData.assignments];
+  if (fSubj) arr = arr.filter(a => a.subject === fSubj);
+  if (fPri)  arr = arr.filter(a => a.priority === fPri);
+  const pOrder = { high:0, mid:1, low:2 };
+  arr.sort((a, b) => {
+    if (fSort === 'priority') return (pOrder[a.priority]??1) - (pOrder[b.priority]??1);
+    if (!a.deadline && !b.deadline) return 0;
+    if (!a.deadline) return 1; if (!b.deadline) return -1;
+    return a.deadline.localeCompare(b.deadline);
+  });
+  return arr;
+}
+function renderAssignments() {
+  const arr = getFilteredAssignments();
+  const tb  = document.getElementById('asgn-tbody');
+  if (!arr.length) { tb.innerHTML = `<tr><td colspan="5" class="empty-table">✦ no assignments yet</td></tr>`; return; }
+  const pClass = { high:'p-high', mid:'p-mid', low:'p-low' };
+  const pLabel = { high:'High',  mid:'Medium', low:'Low' };
+  tb.innerHTML = arr.map(a => `<tr>
+    <td>${esc(a.name)}</td>
+    <td>${esc(a.subject || '—')}</td>
+    <td>${deadlineBadge(a.deadline)}</td>
+    <td><span class="priority-badge ${pClass[a.priority]||'p-mid'}">${pLabel[a.priority]||'Medium'}</span></td>
+    <td><button class="tbl-btn tbl-del" onclick="deleteAssignment(${a.id})">✕</button></td>
+  </tr>`).join('');
+}
+
+/* ── PROJECTS ── */
+function addProject() {
+  const name = document.getElementById('proj-name').value.trim();
+  if (!name) { document.getElementById('proj-name').focus(); return; }
+  schoolData.projects.push({
+    id:       Date.now(),
+    name,
+    subject:  document.getElementById('proj-subject').value,
+    deadline: document.getElementById('proj-deadline').value
+  });
+  document.getElementById('proj-name').value = '';
+  document.getElementById('proj-deadline').value = '';
+  saveSchool(); renderProjects();
+}
+function deleteProject(id) {
+  schoolData.projects = schoolData.projects.filter(p => p.id !== id);
+  saveSchool(); renderProjects();
+}
+function getFilteredProjects() {
+  const fSubj = document.getElementById('flt-proj-subject')?.value || '';
+  let arr = [...schoolData.projects];
+  if (fSubj) arr = arr.filter(p => p.subject === fSubj);
+  arr.sort((a, b) => {
+    if (!a.deadline && !b.deadline) return 0;
+    if (!a.deadline) return 1; if (!b.deadline) return -1;
+    return a.deadline.localeCompare(b.deadline);
+  });
+  return arr;
+}
+function renderProjects() {
+  const arr = getFilteredProjects();
+  const tb  = document.getElementById('proj-tbody');
+  if (!arr.length) { tb.innerHTML = `<tr><td colspan="4" class="empty-table">◎ no projects yet</td></tr>`; return; }
+  tb.innerHTML = arr.map(p => `<tr>
+    <td>${esc(p.name)}</td>
+    <td>${esc(p.subject || '—')}</td>
+    <td>${deadlineBadge(p.deadline)}</td>
+    <td><button class="tbl-btn tbl-del" onclick="deleteProject(${p.id})">✕</button></td>
+  </tr>`).join('');
+}
+
+/* ── COMBINED RENDER ── */
+function renderSchoolAll() { populateSubjectSelects(); renderAssignments(); renderProjects(); }
+
+/* Enter key for school inputs */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const el = document.activeElement; if (!el) return;
+  if (el.id === 'asgn-name' || el.id === 'asgn-deadline') { addAssignment(); return; }
+  if (el.id === 'proj-name' || el.id === 'proj-deadline') { addProject(); return; }
+  if (el.id === 'new-subject-inp') { addSubject(); return; }
+});
+
+renderSchoolAll();
 </script>
 </body>
 </html>

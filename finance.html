@@ -296,6 +296,161 @@ body {
   .month-nav { flex-wrap: wrap; }
   .month-nav-label { min-width: 140px; }
 }
+/* ── MANAGE CATEGORIES MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(42,34,48,0.35); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-overlay.hidden { display: none; }
+.modal-card {
+  background: var(--white); border-radius: var(--radius-lg);
+  padding: 28px 26px 22px; max-width: 420px; width: 92%;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--lav-2);
+  animation: catPop 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  max-height: 90vh; overflow-y: auto;
+}
+@keyframes catPop {
+  from { opacity:0; transform:scale(0.88) translateY(16px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.25rem; font-weight: 600; color: var(--lav-4);
+  margin-bottom: 18px; letter-spacing: 0.04em;
+}
+.cat-tab-row {
+  display: flex; gap: 6px; margin-bottom: 16px;
+}
+.cat-tab-btn {
+  flex: 1; padding: 7px 12px; border-radius: 50px;
+  border: 1.5px solid var(--cream-3); background: var(--white);
+  font-family: 'Nunito', sans-serif; font-size: 0.8rem;
+  font-weight: 600; cursor: pointer; transition: all 0.18s; color: var(--text-2);
+}
+.cat-tab-btn.active.income  { background: var(--green-1); border-color: var(--green-3); color: var(--green-5); }
+.cat-tab-btn.active.expense { background: var(--pink-1);  border-color: var(--pink-3);  color: var(--pink-5);  }
+.cat-list {
+  display: flex; flex-direction: column; gap: 7px;
+  margin-bottom: 14px; max-height: 220px; overflow-y: auto;
+}
+.cat-item {
+  display: flex; align-items: center; justify-content: space-between;
+  border-radius: var(--radius-sm); padding: 8px 12px;
+  font-size: 0.84rem; border: 1px solid;
+}
+.cat-item.income  { background: var(--green-1); border-color: var(--green-2); color: var(--green-5); }
+.cat-item.expense { background: var(--pink-1);  border-color: var(--pink-2);  color: var(--pink-5);  }
+.cat-del-btn {
+  padding: 3px 8px; border-radius: 5px; border: none;
+  font-size: 0.68rem; font-weight: 700; cursor: pointer;
+  font-family: 'Nunito', sans-serif; transition: all 0.15s;
+  background: rgba(255,255,255,0.6); color: inherit;
+}
+.cat-del-btn:hover { background: rgba(255,255,255,0.95); }
+.cat-add-row { display: flex; gap: 7px; margin-bottom: 4px; }
+.cat-input {
+  flex: 1; padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cream-3); background: var(--cream);
+  font-family: 'Nunito', sans-serif; font-size: 0.84rem;
+  outline: none; color: var(--text-1); transition: border 0.18s;
+}
+.cat-input:focus { border-color: var(--lav-3); background: var(--white); }
+.cat-empty {
+  text-align: center; padding: 18px; color: var(--text-4);
+  font-size: 0.8rem;
+}
+.modal-close-btn {
+  width: 100%; padding: 10px; border-radius: var(--radius-sm); border: none;
+  background: var(--lav-4); color: white;
+  font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; margin-top: 12px; transition: all 0.18s;
+}
+.modal-close-btn:hover { background: var(--lav-5); }
+.btn-manage-cat {
+  padding: 6px 14px; border-radius: 50px;
+  border: 1.5px solid var(--lav-2); background: var(--lav-1);
+  color: var(--lav-4); font-family: 'Nunito', sans-serif;
+  font-size: 0.76rem; font-weight: 600;
+  cursor: pointer; transition: all 0.18s; white-space: nowrap;
+}
+.btn-manage-cat:hover { background: var(--lav-2); }
+
+/* ── NOTES / PENDING RETURNS ── */
+.notes-list { display: flex; flex-direction: column; gap: 10px; }
+.note-card {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  background: var(--cream); border-radius: var(--radius-sm);
+  padding: 13px 15px; border: 1px solid var(--cream-3);
+  border-left: 4px solid var(--peach-3); transition: all 0.18s;
+}
+.note-card:hover { background: var(--peach-1); border-color: var(--peach-2); }
+.note-card.returned {
+  border-left-color: var(--green-3); opacity: 0.6;
+  background: var(--green-1);
+}
+.note-card.returned .note-amount { color: var(--green-4); }
+.note-card.returned .note-desc   { text-decoration: line-through; color: var(--text-4); }
+.note-info { flex: 1; }
+.note-who {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--peach-4); margin-bottom: 3px;
+}
+.note-card.returned .note-who { color: var(--green-4); }
+.note-desc { font-size: 0.87rem; color: var(--text-1); font-weight: 500; margin-bottom: 4px; }
+.note-date { font-size: 0.7rem; color: var(--text-4); }
+.note-amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem; font-weight: 600; color: var(--peach-4);
+  white-space: nowrap; align-self: center;
+}
+.note-actions { display: flex; flex-direction: column; gap: 5px; align-self: center; }
+.note-btn {
+  padding: 4px 10px; border-radius: 5px; border: none;
+  font-size: 0.68rem; font-weight: 700; cursor: pointer;
+  font-family: 'Nunito', sans-serif; transition: all 0.15s; white-space: nowrap;
+}
+.note-btn-return  { background: var(--green-1);  color: var(--green-5); }
+.note-btn-return:hover  { background: var(--green-2); }
+.note-btn-unreturn { background: var(--cream-2); color: var(--text-3); }
+.note-btn-unreturn:hover { background: var(--cream-3); }
+.note-btn-del  { background: var(--pink-1);  color: var(--pink-4); }
+.note-btn-del:hover  { background: var(--pink-2); }
+.notes-summary {
+  display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.notes-chip {
+  padding: 6px 14px; border-radius: 50px; font-size: 0.78rem; font-weight: 600;
+  border: 1px solid; display: flex; align-items: center; gap: 6px;
+}
+.notes-chip.pending  { background: var(--peach-1); border-color: var(--peach-2); color: var(--peach-4); }
+.notes-chip.returned { background: var(--green-1); border-color: var(--green-2); color: var(--green-5); }
+.notes-add-form {
+  display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px;
+  align-items: end; margin-bottom: 18px; flex-wrap: wrap;
+}
+.notes-add-form input, .notes-add-form select {
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cream-3); background: var(--white);
+  font-family: 'Nunito', sans-serif; font-size: 0.83rem; color: var(--text-1);
+  outline: none; transition: border 0.18s;
+}
+.notes-add-form input:focus { border-color: var(--lav-3); background: var(--lav-1); }
+.notes-filter-row {
+  display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap;
+}
+.notes-filter-btn {
+  padding: 5px 14px; border-radius: 50px; font-size: 0.76rem; font-weight: 600;
+  border: 1.5px solid var(--cream-3); background: var(--white);
+  cursor: pointer; font-family: 'Nunito', sans-serif; color: var(--text-2);
+  transition: all 0.18s;
+}
+.notes-filter-btn.active { background: var(--peach-1); border-color: var(--peach-3); color: var(--peach-4); }
+.notes-empty { text-align: center; padding: 28px; color: var(--text-4); font-size: 0.82rem; }
+
+@media (max-width: 768px) {
+  .notes-add-form { grid-template-columns: 1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -396,7 +551,10 @@ body {
 
   <!-- TRANSACTIONS -->
   <div class="card">
-    <div class="section-title">💸 Transactions</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+  <div class="section-title" style="margin-bottom:0">💸 Transactions</div>
+  <button class="btn-manage-cat" onclick="openCatModal()">⚙ Manage Categories</button>
+</div>
     <div class="month-nav">
       <button class="month-nav-btn" onclick="prevMonth()">‹</button>
       <div class="month-nav-label" id="currentMonthLabel">April 2025</div>
@@ -477,11 +635,57 @@ body {
     <button class="add-account-btn" onclick="showAddAccountDialog()">+ Add Account</button>
   </div>
 
+  <!-- PENDING RETURNS NOTES -->
+  <div class="card">
+    <div class="section-title">📝 Pending Notes</div>
+    <p style="font-size:0.78rem;color:var(--text-3);margin-top:-10px;margin-bottom:16px;line-height:1.6">
+      Track money that's elsewhere and waiting to come back.
+    </p>
+
+    <div class="notes-summary">
+      <div class="notes-chip pending">⏳ Pending: <span id="notes-pending-total">$0</span></div>
+      <div class="notes-chip returned">✓ Returned: <span id="notes-returned-total">$0</span></div>
+    </div>
+
+    <div class="notes-add-form">
+      <input type="text"   id="note-desc"   placeholder="e.g. Lent to Sarah for lunch…">
+      <input type="text"   id="note-who"    placeholder="Who / Where" style="max-width:150px">
+      <input type="number" id="note-amount" placeholder="Amount" min="0" step="0.01" style="max-width:120px">
+      <button class="add-goal-btn" onclick="addNote()" style="white-space:nowrap">+ Add Note</button>
+    </div>
+
+    <div class="notes-filter-row">
+      <span style="font-size:0.72rem;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.06em">Show:</span>
+      <button class="notes-filter-btn active" id="nflt-all"      onclick="setNotesFilter('all',this)">All</button>
+      <button class="notes-filter-btn"        id="nflt-pending"  onclick="setNotesFilter('pending',this)">Pending</button>
+      <button class="notes-filter-btn"        id="nflt-returned" onclick="setNotesFilter('returned',this)">Returned</button>
+    </div>
+
+    <div class="notes-list" id="notes-list">
+      <div class="notes-empty">No notes yet — add one above ✦</div>
+    </div>
+  </div>
 </div><!-- /finance-container -->
 
 <!-- NOT SIGNED IN GATE -->
 <div class="auth-gate" id="authGate" style="display:none">
   <p>Please <a href="index2.html">sign in</a> to view your finances.</p>
+</div>
+<!-- MANAGE CATEGORIES MODAL -->
+<div class="modal-overlay hidden" id="cat-modal">
+  <div class="modal-card">
+    <div class="modal-title">✦ Manage Categories</div>
+    <div class="cat-tab-row">
+      <button class="cat-tab-btn active income"  id="cat-tab-income"  onclick="switchCatTab('income')">📈 Income</button>
+      <button class="cat-tab-btn expense"        id="cat-tab-expense" onclick="switchCatTab('expense')">📉 Expenses</button>
+    </div>
+    <div class="cat-list" id="cat-list"></div>
+    <div class="cat-add-row">
+      <input class="cat-input" type="text" id="new-cat-inp" placeholder="New category name…">
+      <button class="add-goal-btn" onclick="addCategory()" style="white-space:nowrap">+ Add</button>
+    </div>
+    <button class="modal-close-btn" onclick="closeCatModal()">Done</button>
+  </div>
 </div>
 
 <script>
@@ -512,7 +716,7 @@ const financeData = {
   goals:        []
 };
 
-const CATEGORIES = {
+let CATEGORIES = {
   income: [
     { id: 'salary',     name: 'Salary'     },
     { id: 'bonus',      name: 'Bonus'      },
@@ -521,14 +725,17 @@ const CATEGORIES = {
     { id: 'other_inc',  name: 'Other'      }
   ],
   expense: [
-    { id: 'food',        name: 'Food & Dining'   },
-    { id: 'transport',   name: 'Transportation'  },
-    { id: 'entertain',   name: 'Entertainment'   },
-    { id: 'utilities',   name: 'Utilities'       },
-    { id: 'shopping',    name: 'Shopping'        },
-    { id: 'other_exp',   name: 'Other'           }
+    { id: 'food',      name: 'Food & Dining'  },
+    { id: 'transport', name: 'Transportation' },
+    { id: 'entertain', name: 'Entertainment'  },
+    { id: 'utilities', name: 'Utilities'      },
+    { id: 'shopping',  name: 'Shopping'       },
+    { id: 'other_exp', name: 'Other'          }
   ]
 };
+let activeCatTab = 'income';
+
+function categoriesDoc() { return userRef().collection('settings').doc('categories'); }
 
 let currentDate = new Date();
 
@@ -575,9 +782,11 @@ auth.onAuthStateChanged(user => {
     document.getElementById('txDate').valueAsDate = new Date();
     updateMonthDisplay();
     setupFirestoreListeners();
+    setupNotesListener(user.uid);
   } else {
     // Tear down listeners
     unsubscribers.forEach(fn => fn());
+    if (unsubNotes) { unsubNotes(); unsubNotes = null; }
     unsubscribers = [];
 
     document.getElementById('nav-user').style.display    = 'none';
@@ -621,10 +830,87 @@ function setupFirestoreListeners() {
       financeData.goals = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderGoals();
     }, err => console.error('Goals listener error:', err));
-
-  unsubscribers = [unsubAccounts, unsubTx, unsubGoals];
+  // Categories
+  const unsubCats = categoriesDoc()
+    .onSnapshot(snap => {
+      if (snap.exists) {
+        const d = snap.data();
+        if (d.income?.length)  CATEGORIES.income  = d.income;
+        if (d.expense?.length) CATEGORIES.expense = d.expense;
+      }
+      updateCategories(); // refresh the form dropdown
+    }, err => console.error('Categories listener error:', err));
+  unsubscribers = [unsubAccounts, unsubTx, unsubGoals, unsubCats];
+}
+/* ══════════════════════════════════
+   CATEGORY MANAGEMENT
+══════════════════════════════════ */
+function openCatModal() {
+  activeCatTab = 'income';
+  document.getElementById('cat-tab-income').classList.add('active');
+  document.getElementById('cat-tab-expense').classList.remove('active');
+  renderCatList();
+  document.getElementById('cat-modal').classList.remove('hidden');
+}
+function closeCatModal() {
+  document.getElementById('cat-modal').classList.add('hidden');
+  updateCategories(); // refresh the transaction form dropdown
+}
+function switchCatTab(type) {
+  activeCatTab = type;
+  document.getElementById('cat-tab-income').classList.toggle('active', type === 'income');
+  document.getElementById('cat-tab-expense').classList.toggle('active', type === 'expense');
+  document.getElementById('new-cat-inp').value = '';
+  renderCatList();
+}
+function renderCatList() {
+  const list = document.getElementById('cat-list');
+  const cats = CATEGORIES[activeCatTab];
+  if (!cats.length) {
+    list.innerHTML = `<div class="cat-empty">No categories yet</div>`;
+    return;
+  }
+  list.innerHTML = cats.map((c, i) => `
+    <div class="cat-item ${activeCatTab}">
+      <span>${c.name}</span>
+      <button class="cat-del-btn" onclick="removeCategory(${i})">✕ Remove</button>
+    </div>`).join('');
+}
+function addCategory() {
+  const inp = document.getElementById('new-cat-inp');
+  const val = inp.value.trim(); if (!val) { inp.focus(); return; }
+  const id  = val.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+  if (!CATEGORIES[activeCatTab].some(c => c.name.toLowerCase() === val.toLowerCase())) {
+    CATEGORIES[activeCatTab].push({ id, name: val });
+    saveCategories();
+  }
+  inp.value = '';
+  renderCatList();
+}
+function removeCategory(i) {
+  CATEGORIES[activeCatTab].splice(i, 1);
+  saveCategories();
+  renderCatList();
+}
+async function saveCategories() {
+  if (!currentUser) return;
+  try {
+    await categoriesDoc().set({
+      income:  CATEGORIES.income,
+      expense: CATEGORIES.expense
+    });
+  } catch(e) { console.error('Error saving categories:', e); }
 }
 
+// Close modal when clicking backdrop
+document.getElementById('cat-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeCatModal();
+});
+
+// Enter key for new category
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement?.id === 'new-cat-inp') addCategory();
+});
 function renderPieChart() {
   const monthTx  = getMonthTransactions();
   const income   = monthTx.filter(t => t.type === 'income').reduce((s,t)  => s + t.amount, 0);
@@ -1009,12 +1295,123 @@ function updateAnalytics() {
 
     renderPieChart();
 }
-
 function navigateToMonth(monthStr) {
   const [y, m] = monthStr.split('-').map(Number);
   currentDate  = new Date(y, m - 1, 1);
   updateMonthDisplay(); renderTransactions(); updateAnalytics();
   document.querySelector('.month-nav').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ══════════════════════════════════
+   PENDING NOTES
+══════════════════════════════════ */
+let notesData    = [];
+let notesFilter  = 'all';
+let unsubNotes   = null;
+
+function notesCol() { return userRef().collection('pendingNotes'); }
+
+function setupNotesListener(uid) {
+  if (unsubNotes) unsubNotes();
+  unsubNotes = notesCol()
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(snap => {
+      notesData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderNotes();
+    }, err => console.error('Notes listener:', err));
+}
+
+async function addNote() {
+  const desc   = document.getElementById('note-desc').value.trim();
+  const who    = document.getElementById('note-who').value.trim();
+  const amount = parseFloat(document.getElementById('note-amount').value);
+  if (!desc) { document.getElementById('note-desc').focus(); return; }
+  if (!who)  { document.getElementById('note-who').focus();  return; }
+  if (!amount || amount <= 0) { document.getElementById('note-amount').focus(); return; }
+
+  await notesCol().add({
+    desc, who, amount, returned: false,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  document.getElementById('note-desc').value   = '';
+  document.getElementById('note-who').value    = '';
+  document.getElementById('note-amount').value = '';
+}
+
+async function toggleNoteReturned(id, current) {
+  await notesCol().doc(id).update({ returned: !current });
+}
+
+async function deleteNote(id) {
+  if (!confirm('Delete this note?')) return;
+  await notesCol().doc(id).delete();
+}
+
+function setNotesFilter(filter, btn) {
+  notesFilter = filter;
+  document.querySelectorAll('.notes-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNotes();
+}
+
+function renderNotes() {
+  const list = document.getElementById('notes-list');
+
+  // Summary chips
+  const pending  = notesData.filter(n => !n.returned).reduce((s, n) => s + n.amount, 0);
+  const returned = notesData.filter(n =>  n.returned).reduce((s, n) => s + n.amount, 0);
+  document.getElementById('notes-pending-total').textContent  = `$${pending.toFixed(2)}`;
+  document.getElementById('notes-returned-total').textContent = `$${returned.toFixed(2)}`;
+
+  // Filter
+  let arr = [...notesData];
+  if (notesFilter === 'pending')  arr = arr.filter(n => !n.returned);
+  if (notesFilter === 'returned') arr = arr.filter(n =>  n.returned);
+
+  if (!arr.length) {
+    list.innerHTML = `<div class="notes-empty">
+      ${notesFilter === 'pending'  ? '✦ No pending notes' :
+        notesFilter === 'returned' ? '✦ Nothing marked returned yet' :
+        'No notes yet — add one above ✦'}
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = arr.map(n => {
+    const date = n.createdAt?.toDate
+      ? n.createdAt.toDate().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+      : '—';
+    return `
+    <div class="note-card ${n.returned ? 'returned' : ''}">
+      <div class="note-info">
+        <div class="note-who">${esc(n.who)}</div>
+        <div class="note-desc">${esc(n.desc)}</div>
+        <div class="note-date">Added ${date}</div>
+      </div>
+      <div class="note-amount">$${Number(n.amount).toFixed(2)}</div>
+      <div class="note-actions">
+        <button class="note-btn ${n.returned ? 'note-btn-unreturn' : 'note-btn-return'}"
+          onclick="toggleNoteReturned('${n.id}', ${n.returned})">
+          ${n.returned ? '↩ Undo' : '✓ Returned'}
+        </button>
+        <button class="note-btn note-btn-del" onclick="deleteNote('${n.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Enter key support for notes
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const id = document.activeElement?.id;
+  if (id === 'note-desc' || id === 'note-who' || id === 'note-amount') addNote();
+});
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 </script>
 </body>
