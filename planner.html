@@ -520,7 +520,7 @@ textarea.text-input{resize:vertical;min-height:70px;line-height:1.6;}
 <!-- ═══════════ YEAR VIEW ═══════════ -->
 <div class="view active" id="view-year">
   <div class="page-header">
-    <h1>My <span>2026</span> Planner</h1>
+    <h1>My <span id="year-title">2026</span> Planner</h1>
     <p>brick by brick</p>
     <div class="header-line"><div class="header-dot"></div><div class="header-dot"></div><div class="header-dot"></div></div>
   </div>
@@ -549,7 +549,11 @@ textarea.text-input{resize:vertical;min-height:70px;line-height:1.6;}
     </div>
     <div class="year-right">
       <div class="months-header">
-        <h2>2026</h2>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="week-arrow" onclick="shiftYear(-1)">‹</button>
+          <h2 id="year-heading">2026</h2>
+          <button class="week-arrow" onclick="shiftYear(1)">›</button>
+        </div>
         <span style="font-size:0.75rem;color:var(--text-3);letter-spacing:0.06em;text-transform:uppercase;">Select a month</span>
         <button class="pill-btn primary" onclick="goToThisWeek()" style="font-size:0.75rem;padding:5px 14px;">✦ This Week</button>
       </div>
@@ -852,6 +856,8 @@ function renderAll() { renderYear(); if(CM!==null) renderMonth(); if(CWS) render
 /* ═══════════════ YEAR VIEW ═══════════════ */
 function renderYear() {
   initData();
+  document.getElementById('year-title').textContent   = CY;   // ← add
+  document.getElementById('year-heading').textContent = CY;
   document.getElementById('year-goal').value       = data[CY].goal       ||'';
   document.getElementById('year-reason').value     = data[CY].reason     ||'';
   document.getElementById('year-motivation').value = data[CY].motivation ||'';
@@ -936,6 +942,11 @@ function fmtDate(d) {
 }
 function fmtHour(h) { if(h===0)return'12 AM'; if(h===12)return'12 PM'; return h<12?`${h} AM`:`${h-12} PM`; }
 function shiftWeek(dir){const d=new Date(CWS);d.setDate(d.getDate()+dir*7);CWS=d;renderWeekView();}
+function shiftYear(dir) {
+  CY += dir;
+  initData();
+  renderYear();
+}
 function goToToday(){CWS=getWeekStart(new Date());renderWeekView();}
 
 /* Weekly goal input */
