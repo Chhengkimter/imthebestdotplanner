@@ -217,10 +217,27 @@ body{
 .card-title a:hover{color:var(--lav-4);}
 
 /* ── TODAY LAYOUT ── */
-.today-row{display:grid;grid-template-columns:minmax(260px,360px) 1fr;gap:16px;}
+.today-row{
+  display:flex;gap:16px;align-items:flex-start;
+}
+.today-schedule-col{
+  width:300px;flex-shrink:0;
+}
+.today-habit-col{
+  flex:1;min-width:0;
+}
 
 /* ── SCHEDULE ── */
-.schedule-list{display:flex;flex-direction:column;gap:7px;}
+.schedule-list{
+  display:flex;flex-direction:column;gap:7px;
+  min-height:200px;
+  max-height:calc(100vh - 220px);
+  overflow-y:auto;
+  padding-right:2px;
+}
+.schedule-list::-webkit-scrollbar{width:3px;}
+.schedule-list::-webkit-scrollbar-track{background:transparent;}
+.schedule-list::-webkit-scrollbar-thumb{background:var(--cream-3);border-radius:4px;}
 .schedule-item{
   display:flex;align-items:flex-start;gap:10px;
   padding:9px 12px;border-radius:var(--radius-sm);
@@ -314,7 +331,9 @@ body{
 .empty-habits{text-align:center;padding:30px;color:var(--text-4);font-size:.84rem;font-style:italic;}
 
 @media(max-width:820px){
-  .today-row{grid-template-columns:1fr;}
+  .today-row{flex-direction:column;}
+  .today-schedule-col{width:100%;}
+  .schedule-list{max-height:320px;}
   .nav{padding:0 14px;}
   .nav-link{padding:6px 10px;font-size:.75rem;}
   .dash-wrap{padding:0 14px 50px;}
@@ -389,39 +408,42 @@ body{
     <div class="today-row">
 
       <!-- Today's Schedule -->
-      <div class="card">
-        <div class="card-title" style="justify-content:space-between;">
-        <span>🗓 <a href="planner.html">Today's Schedule</a></span>
-        <a href="planner.html?view=week" title="Open this week's planner"
-          style="width:28px;height:28px;border-radius:50%;background:var(--lav-1);border:1.5px solid var(--lav-2);color:var(--lav-4);display:flex;align-items:center;justify-content:center;font-size:.75rem;text-decoration:none;flex-shrink:0;transition:all .18s;"
-          onmouseover="this.style.background='var(--lav-2)'"
-          onmouseout="this.style.background='var(--lav-1)'">↗</a>
-      </div>
-        </div>
-        <div class="schedule-list" id="schedule-list">
-          <div class="schedule-empty">No events scheduled for today ♡</div>
+      <div class="today-schedule-col">
+        <div class="card">
+          <div class="card-title" style="justify-content:space-between;">
+            <span>🗓 <a href="planner.html">Today's Schedule</a></span>
+            <a href="planner.html?view=week" title="Open this week's planner"
+              style="width:28px;height:28px;border-radius:50%;background:var(--lav-1);border:1.5px solid var(--lav-2);color:var(--lav-4);display:flex;align-items:center;justify-content:center;font-size:.75rem;text-decoration:none;flex-shrink:0;transition:all .18s;"
+              onmouseover="this.style.background='var(--lav-2)'"
+              onmouseout="this.style.background='var(--lav-1)'">↗</a>
+          </div>
+          <div class="schedule-list" id="schedule-list">
+            <div class="schedule-empty">No events scheduled for today ♡</div>
+          </div>
         </div>
       </div>
 
-      <!-- Habit Tracker (inline, same row) -->
-      <div class="card" style="padding:20px 20px 16px;">
-        <div class="habit-header">
-          <div class="card-title" style="margin-bottom:0;">🌱 Habit Tracker</div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="habit-month-nav">
-              <button class="month-nav-btn" onclick="changeHabitMonth(-1)">‹</button>
-              <span class="month-label" id="habit-month-label"></span>
-              <button class="month-nav-btn" onclick="changeHabitMonth(1)">›</button>
+      <!-- Habit Tracker -->
+      <div class="today-habit-col">
+        <div class="card" style="padding:20px 20px 16px;">
+          <div class="habit-header">
+            <div class="card-title" style="margin-bottom:0;">🌱 Habit Tracker</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="habit-month-nav">
+                <button class="month-nav-btn" onclick="changeHabitMonth(-1)">‹</button>
+                <span class="month-label" id="habit-month-label"></span>
+                <button class="month-nav-btn" onclick="changeHabitMonth(1)">›</button>
+              </div>
+              <button class="add-habit-btn" onclick="openHabitModal()">+ Add Habit</button>
             </div>
-            <button class="add-habit-btn" onclick="openHabitModal()">+ Add Habit</button>
           </div>
-        </div>
-        <div style="margin-top:14px;">
-          <div class="habit-table-outer">
-            <table class="habit-table" id="habit-table">
-              <thead id="habit-thead"></thead>
-              <tbody id="habit-tbody"></tbody>
-            </table>
+          <div style="margin-top:14px;">
+            <div class="habit-table-outer">
+              <table class="habit-table" id="habit-table">
+                <thead id="habit-thead"></thead>
+                <tbody id="habit-tbody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -445,13 +467,17 @@ function fmtDate(date){
   return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function getWeekStart(date){
-  const d=new Date(date),day=d.getDay();
-  return new Date(d.setDate(d.getDate()-day));
+  // Monday-based week — must match planner.html
+  const d=new Date(date); d.setHours(0,0,0,0);
+  const day=d.getDay();
+  d.setDate(d.getDate()+(day===0?-6:1-day));
+  return d;
 }
 function formatHour(hour){
-  const h=Math.floor(hour),m=Math.round((hour-h)*60);
+  // hour is an integer (e.g. 8, 13, 22)
+  const h=Math.floor(hour);
   const ampm=h>=12?'pm':'am',hr=h%12||12;
-  return`${hr}:${String(m).padStart(2,'0')}${ampm}`;
+  return`${hr}:00${ampm}`;
 }
 
 /* ── STATE ── */
@@ -560,20 +586,32 @@ function renderSchedule(){
   const yr=today.getFullYear(),mo=today.getMonth();
   const weekKey=fmtDate(getWeekStart(today));
   const dateStr=fmtDate(today);
+
+  // Collect slots from the correct week key for today's date.
+  // Also search all months' weeks in case the week spans a month boundary.
   let slots=[];
-  if(plannerData[yr]?.[mo]?.weeks?.[weekKey]?.[dateStr]){
-    slots=plannerData[yr][mo].weeks[weekKey][dateStr];
+  const searchMonths=[mo>0?mo-1:null, mo, mo<11?mo+1:null].filter(m=>m!==null);
+  for(const m of searchMonths){
+    const found=plannerData[yr]?.[m]?.weeks?.[weekKey]?.[dateStr];
+    if(found&&found.length) { slots=[...slots,...found]; }
   }
+
   if(!slots.length){
     el.innerHTML='<div class="schedule-empty">No events scheduled for today ♡</div>';
     return;
   }
   slots=[...slots].sort((a,b)=>(a.hour??9999)-(b.hour??9999));
-  el.innerHTML=slots.map(s=>`
-    <div class="schedule-item">
+
+  // Category colour map
+  const catColor={personal:'#e89abf',work:'#b8a8ec',study:'#88c8a4'};
+
+  el.innerHTML=slots.map(s=>{
+    const border=catColor[s.cat]||'var(--lav-3)';
+    return`<div class="schedule-item" style="border-left-color:${border}">
       <span class="schedule-time">${s.hour!==undefined?formatHour(s.hour):''}</span>
       <span class="schedule-text">${escHtml(s.text||'Unnamed event')}</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 /* ── HABITS ── */

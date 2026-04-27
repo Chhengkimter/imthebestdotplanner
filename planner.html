@@ -1048,7 +1048,7 @@ function renderTaskPanel() {
     const allTasks=[
       ...newTasks.map(t=>({...t,status:'new'})),
       ...progTasks.map(t=>({...t,status:'prog'})),
-      ...doneTasks.map(t=>({...t,status:'done'})),
+      // done tasks are excluded from the panel — they're invisible
     ];
 
     const cnt=document.getElementById(`cnt-${cat}`);
@@ -1216,14 +1216,21 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
     showWeek(CWS);
   }
 })();
-// REPLACE isTodoDone with:
 function isTodoDone(cat, todoId, text) {
-  const allDone = [
-    ...(todoData['personal']?.done || []),
-    ...(todoData['work']?.done || []),
-    ...(todoData['school']?.done || []),
-  ];
-return todoId != null && todoId !== 'null' && allDone.some(t => String(t.id) === String(todoId));
+  if (todoId == null || todoId === 'null') return false;
+  // Map slot cat → todo collection key
+  const keyMap = { personal: 'personal', work: 'work', study: 'school' };
+  const key = keyMap[cat];
+  // Check the specific category first, then fall back to all done lists
+  const doneLists = key
+    ? (todoData[key]?.done || [])
+    : [
+        ...(todoData['personal']?.done || []),
+        ...(todoData['work']?.done || []),
+        ...(todoData['school']?.done || []),
+      ];
+  const list = Array.isArray(doneLists[0]) ? doneLists.flat() : doneLists;
+  return list.some(t => String(t.id) === String(todoId));
 }
 initData();
 renderYear();
