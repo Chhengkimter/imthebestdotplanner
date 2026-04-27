@@ -811,11 +811,14 @@ function setupListeners(uid) {
       initData(); renderAll();
     }, err => console.error(err));
   // Todo data (read-only mirror)
-  db.collection('users').doc(uid).collection('planner').doc('todo')
-    .onSnapshot(snap => {
-      todoData = snap.exists ? snap.data() : {};
-      if (document.getElementById('view-week').classList.contains('active')) renderTaskPanel();
-    }, err => console.error(err));
+db.collection('users').doc(uid).collection('planner').doc('todo')
+  .onSnapshot(snap => {
+    todoData = snap.exists ? snap.data() : {};
+    if (document.getElementById('view-week').classList.contains('active')) {
+      renderTaskPanel();
+      renderWeekView(); 
+    }
+  }, err => console.error(err));
 }
 
 /* ═══════════════ DATA INIT ═══════════════ */
@@ -1000,10 +1003,9 @@ function renderWeekView() {
         <div class="wg-slot" onclick="handleSlot('${ds}',${hour},${dm},event)" data-date="${ds}" data-hour="${hour}">
           ${!tasks.length?`<div class="wg-add-hint">+ schedule</div>`:''}
           <div class="wg-tasks">
-            ${tasks.map(t=>{
-              const catCls=t.cat?`cat-${t.cat}`:'cat-none';
-              const isDone=isTodoDone(t.cat, t.todoId);
-              return `<div class="wg-task ${catCls}${isDone?' is-done':''}" onclick="event.stopPropagation()" title="${esc(t.text)}">
+            ${tasks.filter(t => !isTodoDone(t.cat, t.todoId, t.text)).map(t=>{
+            const catCls=t.cat?`cat-${t.cat}`:'cat-none';
+            return `<div class="wg-task ${catCls}" onclick="event.stopPropagation()" title="${esc(t.text)}">
                 <div class="wg-task-cat-strip"></div>
                 <span class="wg-task-text">${esc(t.text)}</span>
                 <button class="wg-task-del" onclick="delSlotTask('${ds}',${hour},${dm},${t.id})">✕</button>
@@ -1035,13 +1037,6 @@ function toggleCat(cat) {
 
 /* Map: panel category → todo category key */
 function todoCatKey(cat) { return cat==='study'?'school':cat; }
-
-/* Check if a linked todo task is done */
-function isTodoDone(cat, todoId) {
-  if(!todoId||!cat) return false;
-  const key=todoCatKey(cat);
-  return (todoData[key]?.done||[]).some(t=>t.id===todoId);
-}
 
 function renderTaskPanel() {
   _panelTasks = []; // reset registry
@@ -1075,7 +1070,7 @@ function renderTaskPanel() {
       const isDone=t.status==='done';
       const priKey=priMap[t.priority]||'m';
       const idx=_panelTasks.length;
-      _panelTasks.push({text:t.text, cat, todoId:t.id, pri:priKey});
+      _panelTasks.push({text:t.text, cat, todoId:String(t.id), pri:priKey});
       const isSelected=selectedTask?.todoId===t.id;
       return `<div class="cat-task-item${isDone?' done':''}${isSelected?' selected':''}"
         ${!isDone?`onclick="selectTask(${idx})"`:''}>
@@ -1153,13 +1148,14 @@ function handleSlot(ds, hour, month, event) {
 
 function placeTask(ds, hour, month, taskObj) {
   const wk=fmtDate(CWS);
+  if(!data[CY][month]) data[CY][month] = { goals:[], reason:'', steps:[], weeks:{}, reminders:[] };
   const md=data[CY][month];
   if(!md.weeks) md.weeks={};
   if(!md.weeks[wk]) md.weeks[wk]={};
   if(!md.weeks[wk][ds]) md.weeks[wk][ds]=[];
   md.weeks[wk][ds].push({
     id:Date.now(), hour, text:taskObj.text,
-    cat:taskObj.cat||null, todoId:taskObj.todoId||null, pri:taskObj.pri||'m'
+    cat:taskObj.cat||null, todoId:taskObj.todoId!=null?String(taskObj.todoId):null, pri:taskObj.pri||'m'
   });
   renderWeekView(); save();
 }
@@ -1210,8 +1206,25 @@ function renderCheckList(containerId, items, toggleFn, deleteFn) {
     </div>`).join('');
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-
-/* ═══════════════ INIT ═══════════════ */
+// Auto-navigate if ?view=week
+(function(){
+  const p = new URLSearchParams(location.search);
+  if(p.get('view')==='week'){
+    const today = new Date();
+    CM = today.getMonth();
+    CWS = getWeekStart(today);
+    showWeek(CWS);
+  }
+})();
+// REPLACE isTodoDone with:
+function isTodoDone(cat, todoId, text) {
+  const allDone = [
+    ...(todoData['personal']?.done || []),
+    ...(todoData['work']?.done || []),
+    ...(todoData['school']?.done || []),
+  ];
+return todoId != null && todoId !== 'null' && allDone.some(t => String(t.id) === String(todoId));
+}
 initData();
 renderYear();
 </script>
