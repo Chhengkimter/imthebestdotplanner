@@ -410,6 +410,19 @@ body {
 .p-mid  { background: var(--lav-1);   color: var(--lav-4); }
 .p-low  { background: var(--green-1); color: var(--green-4); }
 
+.status-btn {
+  padding: 2px 8px; border-radius: 20px; border: none;
+  font-size: 0.68rem; font-weight: 700; cursor: pointer;
+  font-family: 'Nunito', sans-serif; transition: all 0.15s; letter-spacing: 0.04em;
+}
+.status-btn.new  { background: var(--lav-1);   color: var(--lav-4);   border: 1px solid var(--lav-2); }
+.status-btn.prog { background: var(--peach-1); color: var(--peach-4); border: 1px solid var(--peach-2); }
+.status-btn.done { background: var(--green-1); color: var(--green-4); border: 1px solid var(--green-2); }
+.status-btn:hover { opacity: 0.75; transform: translateY(-1px); }
+.asgn-row[draggable="true"] { cursor: grab; }
+.asgn-row[draggable="true"]:hover td { background: var(--lav-1) !important; }
+.tasks-list.drag-over { background: var(--lav-1); border: 2px dashed var(--lav-3); border-radius: var(--radius-sm); }
+
 /* ── ADD FORM ── */
 .add-form {
   padding: 9px 12px 13px; border-top: 1px solid var(--cream-3);
@@ -707,12 +720,6 @@ body {
     </div>
   </div>
 
-  <div class="stats-bar">
-    <div class="stat-chip">✦ <span class="stat-num" id="stat-total">0</span> total</div>
-    <div class="stat-chip">◎ <span class="stat-num" id="stat-done">0</span> done</div>
-    <div class="stat-chip">✿ <span class="stat-num" id="stat-pct">0%</span> complete</div>
-  </div>
-
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTodoTab('school',this)">School</button>
     <button class="tab-btn"        onclick="switchTodoTab('work',this)">Work</button>
@@ -725,7 +732,8 @@ body {
      <div class="board active" id="board-school">
         <div class="col col-new">
           <div class="col-header"><span class="dot"></span><h3>New Task</h3><span class="col-count" id="cnt-school-new">0</span></div>
-          <div class="tasks-list" id="list-school-new"></div>
+          <div class="tasks-list" id="list-school-new"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('school','new',event)"></div>
           <div class="add-form">
             <input type="text" placeholder="Add a new task…" id="inp-school-new">
             <div class="add-row">
@@ -736,7 +744,8 @@ body {
         </div>
         <div class="col col-prog">
           <div class="col-header"><span class="dot"></span><h3>In Progress</h3><span class="col-count" id="cnt-school-prog">0</span></div>
-          <div class="tasks-list" id="list-school-prog"></div>
+          <div class="tasks-list" id="list-school-prog"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('school','prog',event)"></div>
           <div class="add-form">
             <input type="text" placeholder="Add a task…" id="inp-school-prog">
             <div class="add-row">
@@ -747,7 +756,8 @@ body {
         </div>
         <div class="col col-done">
           <div class="col-header"><span class="dot"></span><h3>Done</h3><span class="col-count" id="cnt-school-done">0</span></div>
-          <div class="tasks-list" id="list-school-done"></div>
+          <div class="tasks-list" id="list-school-done"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('school','done',event)"></div>
           <div class="add-form">
             <input type="text" placeholder="Add a task…" id="inp-school-done">
             <div class="add-row">
@@ -762,7 +772,8 @@ body {
     <div class="board" id="board-work">
       <div class="col col-new">
         <div class="col-header"><span class="dot"></span><h3>New Task</h3><span class="col-count" id="cnt-work-new">0</span></div>
-        <div class="tasks-list" id="list-work-new"></div>
+        <div class="tasks-list" id="list-work-new"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('work','new',event)"></div>
         <div class="add-form">
           <input type="text" placeholder="Add a new task…" id="inp-work-new">
           <div class="add-row">
@@ -777,7 +788,8 @@ body {
       </div>
       <div class="col col-prog">
         <div class="col-header"><span class="dot"></span><h3>In Progress</h3><span class="col-count" id="cnt-work-prog">0</span></div>
-        <div class="tasks-list" id="list-work-prog"></div>
+        <div class="tasks-list" id="list-work-prog"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('work','prog',event)"></div>
         <div class="add-form">
           <input type="text" placeholder="Add a task…" id="inp-work-prog">
           <div class="add-row">
@@ -792,7 +804,8 @@ body {
       </div>
       <div class="col col-done">
         <div class="col-header"><span class="dot"></span><h3>Done</h3><span class="col-count" id="cnt-work-done">0</span></div>
-        <div class="tasks-list" id="list-work-done"></div>
+        <div class="tasks-list" id="list-work-done"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('work','done',event)"></div>
         <div class="add-form">
           <input type="text" placeholder="Add a task…" id="inp-work-done">
           <div class="add-row">
@@ -811,7 +824,8 @@ body {
     <div class="board" id="board-personal">
       <div class="col col-new">
         <div class="col-header"><span class="dot"></span><h3>New Task</h3><span class="col-count" id="cnt-personal-new">0</span></div>
-        <div class="tasks-list" id="list-personal-new"></div>
+        <div class="tasks-list" id="list-personal-new"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('personal','new',event)"></div>
         <div class="add-form">
           <input type="text" placeholder="Add a new task…" id="inp-personal-new">
           <div class="add-row">
@@ -822,7 +836,8 @@ body {
       </div>
       <div class="col col-prog">
         <div class="col-header"><span class="dot"></span><h3>In Progress</h3><span class="col-count" id="cnt-personal-prog">0</span></div>
-        <div class="tasks-list" id="list-personal-prog"></div>
+        <div class="tasks-list" id="list-personal-prog"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('personal','prog',event)"></div>
         <div class="add-form">
           <input type="text" placeholder="Add a task…" id="inp-personal-prog">
           <div class="add-row">
@@ -833,7 +848,8 @@ body {
       </div>
       <div class="col col-done">
         <div class="col-header"><span class="dot"></span><h3>Done</h3><span class="col-count" id="cnt-personal-done">0</span></div>
-        <div class="tasks-list" id="list-personal-done"></div>
+        <div class="tasks-list" id="list-personal-done"
+      ondragover="onColDragOver(event)" ondragleave="onColDragLeave(event)" ondrop="onColDrop('personal','done',event)"></div>
         <div class="add-form">
           <input type="text" placeholder="Add a task…" id="inp-personal-done">
           <div class="add-row">
@@ -888,7 +904,7 @@ body {
 
       <div class="school-table-wrap">
         <table class="school-table">
-          <thead><tr><th>Assignment</th><th>Subject</th><th>Deadline</th><th>Priority</th><th></th></tr></thead>
+          <thead><tr><th>Assignment</th><th>Subject</th><th>Deadline</th><th>Priority</th><th>Status</th><th></th></tr></thead>
           <tbody id="asgn-tbody"></tbody>
         </table>
       </div>
@@ -1135,13 +1151,7 @@ function renderTodoAll() {
   TODO_CATS.forEach(c => TODO_COLS.forEach(col => renderTodoCol(c,col)));
   updateTodoStats();
 }
-function updateTodoStats() {
-  let total=0, done=0;
-  TODO_CATS.forEach(c => { TODO_COLS.forEach(col => { total += todoData[c][col].length; }); done += todoData[c]['done'].length; });
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-done').textContent  = done;
-  document.getElementById('stat-pct').textContent   = total ? Math.round(done/total*100)+'%' : '0%';
-}
+function updateTodoStats() {}
 
 /* ══════════════════════════════════
    UTILS
@@ -1168,6 +1178,7 @@ renderTodoAll();
    SCHOOL DATA & FIRESTORE
 ══════════════════════════════════ */
 let schoolData = { subjects: ['Math','Science','English','History'], assignments: [], projects: [] };
+let _draggedAssignment = null;
 let unsubSchool = null;
 
 function setupSchoolListener(uid) {
@@ -1257,7 +1268,8 @@ function addAssignment() {
     name,
     subject:  document.getElementById('asgn-subject').value,
     deadline: document.getElementById('asgn-deadline').value,
-    priority: document.getElementById('asgn-priority').value
+    priority: document.getElementById('asgn-priority').value,
+    status:   'new'
   });
   document.getElementById('asgn-name').value = '';
   document.getElementById('asgn-deadline').value = '';
@@ -1286,16 +1298,25 @@ function getFilteredAssignments() {
 function renderAssignments() {
   const arr = getFilteredAssignments();
   const tb  = document.getElementById('asgn-tbody');
-  if (!arr.length) { tb.innerHTML = `<tr><td colspan="5" class="empty-table">✦ no assignments yet</td></tr>`; return; }
+  if (!arr.length) { tb.innerHTML = `<tr><td colspan="6" class="empty-table">✦ no assignments yet</td></tr>`; return; }
   const pClass = { high:'p-high', mid:'p-mid', low:'p-low' };
   const pLabel = { high:'High',  mid:'Medium', low:'Low' };
-  tb.innerHTML = arr.map(a => `<tr>
-    <td>${esc(a.name)}</td>
-    <td>${esc(a.subject || '—')}</td>
-    <td>${deadlineBadge(a.deadline)}</td>
-    <td><span class="priority-badge ${pClass[a.priority]||'p-mid'}">${pLabel[a.priority]||'Medium'}</span></td>
-    <td><button class="tbl-btn tbl-del" onclick="deleteAssignment(${a.id})">✕</button></td>
-  </tr>`).join('');
+  tb.innerHTML = arr.map(a => {
+    const st = a.status || 'new';
+    const stLabel = { new: '○ New', prog: '◎ In Progress', done: '✓ Done' };
+    const nextMap = { new: 'prog', prog: 'done', done: 'new' };
+    return `<tr class="asgn-row" draggable="true"
+      ondragstart="onAssignmentDragStart(${a.id}, event)">
+      <td>${esc(a.name)}</td>
+      <td>${esc(a.subject || '—')}</td>
+      <td>${deadlineBadge(a.deadline)}</td>
+      <td><span class="priority-badge ${pClass[a.priority]||'p-mid'}">${pLabel[a.priority]||'Medium'}</span></td>
+      <td>
+       <button class="status-btn ${st}" onclick="setAssignmentStatus(${a.id},'${nextMap[st]}')">${stLabel[st]}</button>
+      </td>
+      <td><button class="tbl-btn tbl-del" onclick="deleteAssignment(${a.id})">✕</button></td>
+    </tr>`;
+  }).join('');
 }
 
 /* ── PROJECTS ── */
@@ -1337,6 +1358,41 @@ function renderProjects() {
     <td>${deadlineBadge(p.deadline)}</td>
     <td><button class="tbl-btn tbl-del" onclick="deleteProject(${p.id})">✕</button></td>
   </tr>`).join('');
+}
+
+/* ── DRAG & DROP FOR ASSIGNMENTS ── */
+function setAssignmentStatus(id, status) {
+  const a = schoolData.assignments.find(a => a.id === id);
+  if (a) { a.status = status; saveSchool(); renderAssignments(); }
+}
+
+function onAssignmentDragStart(id, event) {
+  const a = schoolData.assignments.find(a => a.id === id);
+  if (!a) return;
+  _draggedAssignment = a;
+  event.dataTransfer.effectAllowed = 'copy';
+}
+
+function onColDragOver(event) {
+  event.preventDefault();
+  event.currentTarget.classList.add('drag-over');
+}
+
+function onColDragLeave(event) {
+  event.currentTarget.classList.remove('drag-over');
+}
+
+function onColDrop(cat, col, event) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drag-over');
+  if (!_draggedAssignment) return;
+  todoData[cat][col].push({
+    id: Date.now(),
+    text: _draggedAssignment.name,
+    priority: _draggedAssignment.priority || 'mid'
+  });
+  _draggedAssignment = null;
+  saveTodo(); renderTodoAll();
 }
 
 /* ── COMBINED RENDER ── */
