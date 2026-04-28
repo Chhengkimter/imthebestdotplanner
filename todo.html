@@ -600,7 +600,45 @@ body {
   font-weight: 600; cursor: pointer; margin-top: 10px; transition: all 0.18s;
 }
 .modal-close-btn:hover { background: var(--lav-5); }
+@media(max-width:820px){
+  .today-row{flex-direction:column;}
+  .today-schedule-col{width:100%;}
+  .schedule-list{max-height:320px;}
+  .nav{padding:0 14px;}
+  .nav-link{padding:6px 10px;font-size:.75rem;}
+  .dash-wrap{padding:0 14px 50px;}
+}
 
+/* NEW — phone-specific */
+@media(max-width:600px){
+  /* Nav: let links scroll sideways without wrapping */
+  .nav-links{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:1;}
+  .nav-links::-webkit-scrollbar{display:none;}
+  .nav-link{white-space:nowrap;}
+  .nav-brand{font-size:1rem;margin-right:8px;}
+  .nav-user-name{display:none;} /* save space */
+
+  /* Auth card */
+  .auth-card{padding:28px 20px 24px;}
+  .auth-card h2{font-size:1.5rem;}
+
+  /* Page header */
+  .page-header{padding:18px 14px 8px;}
+  .page-header h1{font-size:1.3rem;}
+
+  /* Cards */
+  .card{padding:16px;}
+
+  /* Habit header wraps nicely */
+  .habit-header{flex-direction:column;align-items:flex-start;gap:10px;}
+
+  /* Prevent iOS from zooming into inputs */
+  .auth-input,.modal-input{font-size:16px;}
+
+  /* Day cells a touch larger */
+  .day-cell{width:30px;min-width:30px;height:40px;}
+  .day-dot{width:20px;height:20px;}
+}
 @media (max-width: 768px) {
   #school-extras { padding: 0 14px 50px; }
 }
@@ -676,15 +714,52 @@ body {
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTodoTab('work',this)">Work</button>
+    <button class="tab-btn active" onclick="switchTodoTab('school',this)">School</button>
+    <button class="tab-btn"        onclick="switchTodoTab('work',this)">Work</button>
     <button class="tab-btn"        onclick="switchTodoTab('personal',this)">Personal</button>
-    <button class="tab-btn"        onclick="switchTodoTab('school',this)">School</button>
   </div>
 
   <div class="board-wrapper">
 
+    <!-- SCHOOL -->
+     <div class="board active" id="board-school">
+        <div class="col col-new">
+          <div class="col-header"><span class="dot"></span><h3>New Task</h3><span class="col-count" id="cnt-school-new">0</span></div>
+          <div class="tasks-list" id="list-school-new"></div>
+          <div class="add-form">
+            <input type="text" placeholder="Add a new task…" id="inp-school-new">
+            <div class="add-row">
+              <select class="priority-select" id="pri-school-new"><option value="high">High priority</option><option value="mid" selected>Medium priority</option><option value="low">Low priority</option></select>
+              <button class="add-btn" onclick="addTodo('school','new')">+ Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="col col-prog">
+          <div class="col-header"><span class="dot"></span><h3>In Progress</h3><span class="col-count" id="cnt-school-prog">0</span></div>
+          <div class="tasks-list" id="list-school-prog"></div>
+          <div class="add-form">
+            <input type="text" placeholder="Add a task…" id="inp-school-prog">
+            <div class="add-row">
+              <select class="priority-select" id="pri-school-prog"><option value="high">High priority</option><option value="mid" selected>Medium priority</option><option value="low">Low priority</option></select>
+              <button class="add-btn" onclick="addTodo('school','prog')">+ Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="col col-done">
+          <div class="col-header"><span class="dot"></span><h3>Done</h3><span class="col-count" id="cnt-school-done">0</span></div>
+          <div class="tasks-list" id="list-school-done"></div>
+          <div class="add-form">
+            <input type="text" placeholder="Add a task…" id="inp-school-done">
+            <div class="add-row">
+              <select class="priority-select" id="pri-school-done"><option value="high">High priority</option><option value="mid" selected>Medium priority</option><option value="low">Low priority</option></select>
+              <button class="add-btn" onclick="addTodo('school','done')">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <!-- WORK -->
-    <div class="board active" id="board-work">
+    <div class="board" id="board-work">
       <div class="col col-new">
         <div class="col-header"><span class="dot"></span><h3>New Task</h3><span class="col-count" id="cnt-work-new">0</span></div>
         <div class="tasks-list" id="list-work-new"></div>
@@ -768,141 +843,103 @@ body {
         </div>
       </div>
     </div>
-
-    <!-- SCHOOL -->
-    <div class="board" id="board-school">
-      <div class="col col-new">
-        <div class="col-header"><span class="dot"></span><h3>New Task</h3><span class="col-count" id="cnt-school-new">0</span></div>
-        <div class="tasks-list" id="list-school-new"></div>
-        <div class="add-form">
-          <input type="text" placeholder="Add a new task…" id="inp-school-new">
-          <div class="add-row">
-            <select class="priority-select" id="pri-school-new"><option value="high">High priority</option><option value="mid" selected>Medium priority</option><option value="low">Low priority</option></select>
-            <button class="add-btn" onclick="addTodo('school','new')">+ Add</button>
-          </div>
-        </div>
-      </div>
-      <div class="col col-prog">
-        <div class="col-header"><span class="dot"></span><h3>In Progress</h3><span class="col-count" id="cnt-school-prog">0</span></div>
-        <div class="tasks-list" id="list-school-prog"></div>
-        <div class="add-form">
-          <input type="text" placeholder="Add a task…" id="inp-school-prog">
-          <div class="add-row">
-            <select class="priority-select" id="pri-school-prog"><option value="high">High priority</option><option value="mid" selected>Medium priority</option><option value="low">Low priority</option></select>
-            <button class="add-btn" onclick="addTodo('school','prog')">+ Add</button>
-          </div>
-        </div>
-      </div>
-      <div class="col col-done">
-        <div class="col-header"><span class="dot"></span><h3>Done</h3><span class="col-count" id="cnt-school-done">0</span></div>
-        <div class="tasks-list" id="list-school-done"></div>
-        <div class="add-form">
-          <input type="text" placeholder="Add a task…" id="inp-school-done">
-          <div class="add-row">
-            <select class="priority-select" id="pri-school-done"><option value="high">High priority</option><option value="mid" selected>Medium priority</option><option value="low">Low priority</option></select>
-            <button class="add-btn" onclick="addTodo('school','done')">+ Add</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-  <!-- SCHOOL EXTRAS: Assignments + Projects -->
-<div id="school-extras">
-
-  <!-- ── ASSIGNMENTS ── -->
-  <div class="school-section">
-    <div class="school-section-header">
-      <div class="school-section-title">✦ <span>Assignments</span></div>
-      <button class="btn-manage-subj" onclick="openSubjectsModal()">⚙ Manage Subjects</button>
-    </div>
-
-    <div class="add-entry-bar">
-      <input type="text"  id="asgn-name"     placeholder="Assignment name…">
-      <select             id="asgn-subject"></select>
-      <input type="date"  id="asgn-deadline">
-      <select             id="asgn-priority">
-        <option value="high">High</option>
-        <option value="mid" selected>Medium</option>
-        <option value="low">Low</option>
-      </select>
-      <button class="add-btn" onclick="addAssignment()">+ Add</button>
-    </div>
-
-    <div class="filter-bar">
-      <label>Sort:</label>
-      <select class="filter-select" id="flt-asgn-sort" onchange="renderAssignments()">
-        <option value="deadline">Closest Deadline</option>
-        <option value="priority">Priority</option>
-      </select>
-      <label>Subject:</label>
-      <select class="filter-select" id="flt-asgn-subject" onchange="renderAssignments()">
-        <option value="">All</option>
-      </select>
-      <label>Priority:</label>
-      <select class="filter-select" id="flt-asgn-priority" onchange="renderAssignments()">
-        <option value="">All</option>
-        <option value="high">High</option>
-        <option value="mid">Medium</option>
-        <option value="low">Low</option>
-      </select>
-    </div>
-
-    <div class="school-table-wrap">
-      <table class="school-table">
-        <thead><tr><th>Assignment</th><th>Subject</th><th>Deadline</th><th>Priority</th><th></th></tr></thead>
-        <tbody id="asgn-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ── PROJECTS ── -->
-  <div class="school-section">
-    <div class="school-section-header">
-      <div class="school-section-title">◎ <span>Projects</span></div>
-    </div>
-
-    <div class="add-entry-bar">
-      <input type="text"  id="proj-name"     placeholder="Project name…">
-      <select             id="proj-subject"></select>
-      <input type="date"  id="proj-deadline">
-      <button class="add-btn" onclick="addProject()">+ Add</button>
-    </div>
-
-    <div class="filter-bar">
-      <label>Sort:</label>
-      <select class="filter-select" id="flt-proj-sort" onchange="renderProjects()">
-        <option value="deadline">Closest Deadline</option>
-      </select>
-      <label>Subject:</label>
-      <select class="filter-select" id="flt-proj-subject" onchange="renderProjects()">
-        <option value="">All</option>
-      </select>
-    </div>
-
-    <div class="school-table-wrap">
-      <table class="school-table">
-        <thead><tr><th>Project</th><th>Subject</th><th>Deadline</th><th></th></tr></thead>
-        <tbody id="proj-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-
-<!-- MANAGE SUBJECTS MODAL -->
-<div class="modal-overlay hidden" id="subjects-modal">
-  <div class="modal-card">
-    <div class="modal-title">✿ Manage Subjects</div>
-    <div class="subject-list" id="subject-list"></div>
-    <div class="subject-add-row">
-      <input class="subject-input" type="text" id="new-subject-inp" placeholder="New subject name…">
-      <button class="add-btn" onclick="addSubject()">+ Add</button>
-    </div>
-    <button class="modal-close-btn" onclick="closeSubjectsModal()">Done</button>
   </div>
 </div>
-</div>
+<!-- SCHOOL EXTRAS: Assignments + Projects -->
+    <div id="school-extras" class="active">
+
+    <!-- ── ASSIGNMENTS ── -->
+    <div class="school-section">
+      <div class="school-section-header">
+        <div class="school-section-title">✦ <span>Assignments</span></div>
+        <button class="btn-manage-subj" onclick="openSubjectsModal()">⚙ Manage Subjects</button>
+      </div>
+
+      <div class="add-entry-bar">
+        <input type="text"  id="asgn-name"     placeholder="Assignment name…">
+        <select             id="asgn-subject"></select>
+        <input type="date"  id="asgn-deadline">
+        <select             id="asgn-priority">
+          <option value="high">High</option>
+          <option value="mid" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <button class="add-btn" onclick="addAssignment()">+ Add</button>
+      </div>
+
+      <div class="filter-bar">
+        <label>Sort:</label>
+        <select class="filter-select" id="flt-asgn-sort" onchange="renderAssignments()">
+          <option value="deadline">Closest Deadline</option>
+          <option value="priority">Priority</option>
+        </select>
+        <label>Subject:</label>
+        <select class="filter-select" id="flt-asgn-subject" onchange="renderAssignments()">
+          <option value="">All</option>
+        </select>
+        <label>Priority:</label>
+        <select class="filter-select" id="flt-asgn-priority" onchange="renderAssignments()">
+          <option value="">All</option>
+          <option value="high">High</option>
+          <option value="mid">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <div class="school-table-wrap">
+        <table class="school-table">
+          <thead><tr><th>Assignment</th><th>Subject</th><th>Deadline</th><th>Priority</th><th></th></tr></thead>
+          <tbody id="asgn-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PROJECTS ── -->
+    <div class="school-section">
+      <div class="school-section-header">
+        <div class="school-section-title">◎ <span>Projects</span></div>
+      </div>
+
+      <div class="add-entry-bar">
+        <input type="text"  id="proj-name"     placeholder="Project name…">
+        <select             id="proj-subject"></select>
+        <input type="date"  id="proj-deadline">
+        <button class="add-btn" onclick="addProject()">+ Add</button>
+      </div>
+
+      <div class="filter-bar">
+        <label>Sort:</label>
+        <select class="filter-select" id="flt-proj-sort" onchange="renderProjects()">
+          <option value="deadline">Closest Deadline</option>
+        </select>
+        <label>Subject:</label>
+        <select class="filter-select" id="flt-proj-subject" onchange="renderProjects()">
+          <option value="">All</option>
+        </select>
+      </div>
+
+      <div class="school-table-wrap">
+        <table class="school-table">
+          <thead><tr><th>Project</th><th>Subject</th><th>Deadline</th><th></th></tr></thead>
+          <tbody id="proj-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MANAGE SUBJECTS MODAL -->
+    <div class="modal-overlay hidden" id="subjects-modal">
+      <div class="modal-card">
+        <div class="modal-title">✿ Manage Subjects</div>
+        <div class="subject-list" id="subject-list"></div>
+        <div class="subject-add-row">
+          <input class="subject-input" type="text" id="new-subject-inp" placeholder="New subject name…">
+          <button class="add-btn" onclick="addSubject()">+ Add</button>
+        </div>
+        <button class="modal-close-btn" onclick="closeSubjectsModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
 
 <script>
 /* ══════════════════════════════════

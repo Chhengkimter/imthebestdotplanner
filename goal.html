@@ -414,6 +414,45 @@
   .rtype-btn.update.active   { background: var(--blue-4); }
   .rtype-btn.obstacle.active { background: var(--pink-4); }
   .rtype-btn.win.active      { background: var(--green-4); }
+  @media(max-width:820px){
+  .today-row{flex-direction:column;}
+  .today-schedule-col{width:100%;}
+  .schedule-list{max-height:320px;}
+  .nav{padding:0 14px;}
+  .nav-link{padding:6px 10px;font-size:.75rem;}
+  .dash-wrap{padding:0 14px 50px;}
+}
+
+/* NEW — phone-specific */
+@media(max-width:600px){
+  /* Nav: let links scroll sideways without wrapping */
+  .nav-links{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:1;}
+  .nav-links::-webkit-scrollbar{display:none;}
+  .nav-link{white-space:nowrap;}
+  .nav-brand{font-size:1rem;margin-right:8px;}
+  .nav-user-name{display:none;} /* save space */
+
+  /* Auth card */
+  .auth-card{padding:28px 20px 24px;}
+  .auth-card h2{font-size:1.5rem;}
+
+  /* Page header */
+  .page-header{padding:18px 14px 8px;}
+  .page-header h1{font-size:1.3rem;}
+
+  /* Cards */
+  .card{padding:16px;}
+
+  /* Habit header wraps nicely */
+  .habit-header{flex-direction:column;align-items:flex-start;gap:10px;}
+
+  /* Prevent iOS from zooming into inputs */
+  .auth-input,.modal-input{font-size:16px;}
+
+  /* Day cells a touch larger */
+  .day-cell{width:30px;min-width:30px;height:40px;}
+  .day-dot{width:20px;height:20px;}
+}
 </style>
 </head>
 <body>
