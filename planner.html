@@ -211,11 +211,9 @@ body{
 .task-panel{
   width:280px;flex-shrink:0;margin-right:16px;
   display:flex;flex-direction:column;gap:10px;
-  max-height:calc(100vh - var(--nav-h) - 180px);
   position:sticky;top:calc(var(--nav-h) + 10px);
-  overflow-y:auto;
+  align-self:flex-start;
 }
-
 /* Schedule hint banner */
 .schedule-hint{
   background:linear-gradient(135deg,var(--lav-4),var(--pink-3));
@@ -262,7 +260,7 @@ body{
 .cat-study .cat-panel-title{color:var(--cat-study-tx);}
 .cat-study .cat-panel-count{background:var(--cat-study-bg);color:var(--cat-study-tx);border:1px solid var(--cat-study-bd);}
 
-.cat-tasks{padding:6px 8px 8px;display:flex;flex-direction:column;gap:4px;}
+.cat-tasks{padding:6px 8px 8px;display:flex;flex-direction:column;gap:4px;max-height:190px;overflow-y:auto;}
 .cat-task-item{
   display:flex;align-items:flex-start;gap:7px;padding:7px 9px;
   border-radius:var(--radius-sm);border:1px solid var(--cream-3);
@@ -774,6 +772,7 @@ let data        = {};   // planner/main
 let todoData    = {};   // planner/todo
 let CY = 2026, CM = null, CWS = null;
 let selectedTask = null; // { text, cat, todoId, pri }
+let schoolData = { subjects: [], assignments: [], projects: [] };
 let catOpen = { personal: true, work: true, study: true };
 
 const MONTHS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -845,14 +844,22 @@ function setupListeners(uid) {
       initData(); renderAll();
     }, err => console.error(err));
   // Todo data (read-only mirror)
-db.collection('users').doc(uid).collection('planner').doc('todo')
+  db.collection('users').doc(uid).collection('planner').doc('todo')
+    .onSnapshot(snap => {
+      todoData = snap.exists ? snap.data() : {};
+      if (document.getElementById('view-week').classList.contains('active')) {
+        renderTaskPanel();
+        renderWeekView(); 
+      }
+    }, err => console.error(err));
+
+  db.collection('users').doc(uid).collection('planner').doc('school')
   .onSnapshot(snap => {
-    todoData = snap.exists ? snap.data() : {};
+    schoolData = snap.exists ? snap.data() : { subjects: [], assignments: [], projects: [] };
     if (document.getElementById('view-week').classList.contains('active')) {
       renderTaskPanel();
-      renderWeekView(); 
     }
-  }, err => console.error(err));
+  }, err => console.error('School listener:', err));
 }
 
 /* ═══════════════ DATA INIT ═══════════════ */
@@ -1034,7 +1041,7 @@ function renderWeekView() {
       const ds=fmtDate(d), dm=d.getMonth();
       const tasks=(data[CY]?.[dm]?.weeks?.[weekKey]?.[ds]||[]).filter(t=>t.hour===hour);
       html+=`<div class="wg-col">
-        <div class="wg-slot" onclick="handleSlot('${ds}',${hour},${dm},event)" data-date="${ds}" data-hour="${hour}">
+        <div class="wg-slot" onclick="handleSlot('${ds}',${hour},${dm},event)" ondragover="event.preventDefault()" ondrop="dropTask('${ds}',${hour},${dm},event)" data-date="${ds}" data-hour="${hour}">
           ${!tasks.length?`<div class="wg-add-hint">+ schedule</div>`:''}
           <div class="wg-tasks">
             ${tasks.filter(t => !isTodoDone(t.cat, t.todoId, t.text)).map(t=>{
@@ -1107,7 +1114,7 @@ function renderTaskPanel() {
       _panelTasks.push({text:t.text, cat, todoId:String(t.id), pri:priKey});
       const isSelected=selectedTask?.todoId===t.id;
       return `<div class="cat-task-item${isDone?' done':''}${isSelected?' selected':''}"
-        ${!isDone?`onclick="selectTask(${idx})"`:''}>
+        ${!isDone?`draggable="true" ondragstart="dragTask(${idx})" onclick="selectTask(${idx})"`:''}>
         <div class="cat-status-dot" style="background:${statusDotColor[t.status]||'var(--text-4)'}"></div>
         <span class="cat-task-text">${esc(t.text)}</span>
         <span class="cat-task-pri pri-${priKey}">${{h:'High',m:'Med',l:'Low'}[priKey]}</span>
@@ -1115,6 +1122,41 @@ function renderTaskPanel() {
     }).join('');
     container.style.display=catOpen[cat]?'flex':'none';
   });
+  // — Append assignments to study panel only —
+  const studyCont = document.getElementById('tasks-study');
+  if (studyCont) {
+    const asgns = (schoolData.assignments || []).slice().sort((a, b) => {
+      if (!a.deadline && !b.deadline) return 0;
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      return a.deadline.localeCompare(b.deadline);
+    });
+    if (asgns.length) {
+      const divider = `<p style="font-size:0.68rem;color:var(--text-4);padding:4px 4px 2px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;border-top:1px solid var(--cream-3);margin-top:4px;">Assignments</p>`;
+      const priMap = { high:'h', mid:'m', low:'l' };
+      const asgnHtml = asgns.map(a => {
+        const priKey = priMap[a.priority] || 'm';
+        const idx = _panelTasks.length;
+        _panelTasks.push({ text: a.name, cat: 'study', todoId: null, pri: priKey, isAssignment: true, assignmentId: a.id });
+        const today = new Date(); today.setHours(0,0,0,0);
+        const dl = a.deadline ? new Date(a.deadline + 'T00:00:00') : null;
+        const diff = dl ? Math.round((dl - today) / 86400000) : null;
+        const dlLabel = !dl ? '' : diff < 0 ? `<span style="color:var(--pink-4);font-size:0.6rem;margin-left:auto">Overdue</span>`
+          : diff === 0 ? `<span style="color:#856404;font-size:0.6rem;margin-left:auto">Today</span>`
+          : `<span style="color:var(--text-4);font-size:0.6rem;margin-left:auto">${diff}d</span>`;
+        return `<div class="cat-task-item" draggable="true"
+          ondragstart="dragTask(${idx})"
+          onclick="selectTask(${idx})"
+          style="display:flex;align-items:center;gap:6px;">
+          <div class="cat-status-dot" style="background:var(--cat-study-dot)"></div>
+          <span class="cat-task-text">${esc(a.name)}</span>
+          <span class="cat-task-pri pri-${priKey}">${{h:'High',m:'Med',l:'Low'}[priKey]}</span>
+          ${dlLabel}
+        </div>`;
+      }).join('');
+      studyCont.innerHTML += divider + asgnHtml;
+    }
+  }
 }
 
 /* selectTask uses numeric index into _panelTasks — no JSON in onclick */
@@ -1164,6 +1206,27 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') clearSelectedTask(
 
 /* ═══════════════ SLOT INTERACTION ═══════════════ */
 let _pendingSlot=null;
+
+function dragTask(idx) {
+  const task = _panelTasks[idx];
+  if (!task) return;
+  selectedTask = task;
+  document.getElementById('hint-text').textContent =
+    `"${task.text.length>26 ? task.text.slice(0,26)+'…' : task.text}" — drop on a slot`;
+  document.getElementById('schedule-hint').classList.add('show');
+  document.getElementById('week-grid-wrap').classList.add('scheduling-mode');
+  // Store idx for drop handler
+  window._dragTaskIdx = idx;
+}
+
+function dropTask(ds, hour, month, event) {
+  event.preventDefault();
+  const task = _panelTasks[window._dragTaskIdx];
+  if (!task) return;
+  placeTask(ds, hour, month, task);
+  clearSelectedTask();
+  window._dragTaskIdx = null;
+}
 
 function handleSlot(ds, hour, month, event) {
   if(event.target.closest('.wg-task-del')) return;
