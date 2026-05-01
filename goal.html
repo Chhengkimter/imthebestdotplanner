@@ -677,15 +677,6 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 let goals = loadGoals();
 let currentFilter = 'all', currentReflectGoalId = null, currentReflectType = 'update';
 
-if (goals.length === 0) {
-  goals = [
-    { id: genId(), title: 'Launch SaaS MVP', why: 'To prove I can ship a real product and build financial independence outside a 9-5.', deadline: (() => { const d = new Date(); d.setDate(d.getDate() + 2); return d.toISOString().split('T')[0]; })(), status: 'in-progress', category: 'work', tasks: [{ id: genId(), text: 'Design landing page', done: true },{ id: genId(), text: 'Build auth system', done: true },{ id: genId(), text: 'Integrate Stripe', done: false },{ id: genId(), text: 'Write onboarding copy', done: false },{ id: genId(), text: 'Launch on Product Hunt', done: false }], reflections: [{ id: genId(), type: 'win', text: 'Finished the database schema!', date: new Date().toLocaleDateString() }] },
-    { id: genId(), title: 'Read 12 Books This Year', why: "Reading is the cheapest mentorship. Each book is a year of someone's experience compressed.", deadline: '2026-12-31', status: 'in-progress', category: 'personal', tasks: [{ id: genId(), text: 'The Lean Startup', done: true },{ id: genId(), text: 'Deep Work', done: true },{ id: genId(), text: 'Zero to One', done: false },{ id: genId(), text: 'The Mom Test', done: false }], reflections: [] },
-    { id: genId(), title: 'Ace Algorithm Course', why: "Strong fundamentals will let me solve any problem.", deadline: '2026-06-30', status: 'not-started', category: 'school', tasks: [{ id: genId(), text: 'Complete Week 1 modules', done: false },{ id: genId(), text: 'Solve 10 LeetCode mediums', done: false }], reflections: [] }
-  ];
-  saveGoals(goals);
-}
-
 function getStatus(goal) { const total = goal.tasks.length; if (!total) return goal.status; const done = goal.tasks.filter(t => t.done).length; if (!done) return 'not-started'; if (done === total) return 'completed'; return 'in-progress'; }
 function getProgress(goal) { if (!goal.tasks.length) return 0; return Math.round((goal.tasks.filter(t => t.done).length / goal.tasks.length) * 100); }
 function getDeadlineInfo(deadline) {
