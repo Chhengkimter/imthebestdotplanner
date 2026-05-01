@@ -138,7 +138,14 @@ body{
 .year-body{display:grid;grid-template-columns:320px 1fr;gap:0;flex:1;max-width:1280px;margin:0 auto;width:100%;padding:0 24px 40px;}
 .year-left{padding-right:20px;}
 .year-right{padding-left:20px;border-left:1px solid var(--cream-3);}
-.goal-panel{padding:20px;margin-bottom:14px;background:var(--white);border-radius:var(--radius);border:1px solid var(--cream-3);box-shadow:var(--shadow-sm);}
+.goal-panel{
+  padding:20px;
+  margin-bottom:14px;
+  background:var(--white);
+  border-radius:var(--radius);
+  border:1px solid var(--cream-3);
+  box-shadow:var(--shadow-sm);
+}
 .section-subtitle{font-size:0.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-weight:600;}
 .months-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
 .month-card{border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:all 0.22s;border:1px solid transparent;position:relative;overflow:hidden;}
@@ -559,23 +566,11 @@ textarea.text-input{resize:vertical;min-height:70px;line-height:1.6;}
   <div class="year-body">
     <div class="year-left">
       <div class="goal-panel">
-        <p class="section-subtitle">Yearly Goal</p>
-        <textarea class="text-input" id="year-goal" placeholder="What do you want to achieve this year?" rows="3"></textarea>
-      </div>
-      <div class="goal-panel">
-        <p class="section-subtitle">Reason</p>
-        <textarea class="text-input" id="year-reason" placeholder="Why does this goal matter to you?" rows="2"></textarea>
-      </div>
-      <div class="goal-panel">
-        <p class="section-subtitle">Motivation</p>
-        <textarea class="text-input" id="year-motivation" placeholder="What keeps you going?" rows="2"></textarea>
-      </div>
-      <div class="goal-panel">
-        <p class="section-subtitle">Steps to Follow</p>
-        <div class="check-list" id="year-steps-list"></div>
-        <div class="add-row">
-          <input type="text" class="text-input" id="year-step-input" placeholder="Add a step...">
-          <button class="pill-btn primary" onclick="addYearStep()">Add</button>
+        <p class="section-subtitle">Yearly Goals</p>
+        <div id="year-goals-area"></div>
+        <div class="add-row" style="margin-top:4px;">
+          <input type="text" class="text-input" id="year-goal-input" placeholder="Add a goal…">
+          <button class="pill-btn primary" onclick="addYearGoal()">Add</button>
         </div>
       </div>
     </div>
@@ -781,6 +776,7 @@ let selectedTask = null; // { text, cat, todoId, pri }
 let schoolData = { subjects: [], assignments: [], projects: [] };
 let catOpen = { personal: true, work: true, study: true };
 let openGoalId = null;
+let openYearGoalId = null;
 
 const MONTHS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS    = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -871,7 +867,8 @@ function setupListeners(uid) {
 
 /* ═══════════════ DATA INIT ═══════════════ */
 function initData() {
-  if (!data[CY]) data[CY] = { goal:'', reason:'', motivation:'', steps:[] };
+  if (!data[CY]) data[CY] = { goals:[] };
+  if (!data[CY].goals) data[CY].goals = [];
   for (let m=0;m<12;m++) {
     if (!data[CY][m]) data[CY][m] = { goals:[], reason:'', steps:[], weeks:{}, reminders:[] };
   }
@@ -907,12 +904,10 @@ function renderAll() { renderYear(); if(CM!==null) renderMonth(); if(CWS) render
 /* ═══════════════ YEAR VIEW ═══════════════ */
 function renderYear() {
   initData();
-  document.getElementById('year-title').textContent   = CY;   // ← add
+  openYearGoalId = null;
+  document.getElementById('year-title').textContent   = CY;
   document.getElementById('year-heading').textContent = CY;
-  document.getElementById('year-goal').value       = data[CY].goal       ||'';
-  document.getElementById('year-reason').value     = data[CY].reason     ||'';
-  document.getElementById('year-motivation').value = data[CY].motivation ||'';
-  renderCheckList('year-steps-list', data[CY].steps||[], toggleYearStep, deleteYearStep);
+  renderYearGoals();
   const grid=document.getElementById('months-grid');
   grid.innerHTML=MONTHS.map((name,i)=>{
     const [bg,tc]=MONTH_COLORS[i];
@@ -922,13 +917,101 @@ function renderYear() {
     </div>`;
   }).join('');
 }
-document.getElementById('year-goal').addEventListener('input',e=>{data[CY].goal=e.target.value;save();});
-document.getElementById('year-reason').addEventListener('input',e=>{data[CY].reason=e.target.value;save();});
-document.getElementById('year-motivation').addEventListener('input',e=>{data[CY].motivation=e.target.value;save();});
-function addYearStep(){const inp=document.getElementById('year-step-input');const t=inp.value.trim();if(!t){inp.focus();return;}(data[CY].steps=data[CY].steps||[]).push({id:Date.now(),text:t,done:false});inp.value='';renderCheckList('year-steps-list',data[CY].steps,toggleYearStep,deleteYearStep);save();}
-function toggleYearStep(id){const s=data[CY].steps.find(s=>s.id===id);if(s)s.done=!s.done;renderCheckList('year-steps-list',data[CY].steps,toggleYearStep,deleteYearStep);save();}
-function deleteYearStep(id){data[CY].steps=data[CY].steps.filter(s=>s.id!==id);renderCheckList('year-steps-list',data[CY].steps,toggleYearStep,deleteYearStep);save();}
-document.getElementById('year-step-input').addEventListener('keydown',e=>{if(e.key==='Enter')addYearStep();});
+
+function addYearGoal() {
+  const inp = document.getElementById('year-goal-input');
+  const t = inp.value.trim(); if(!t){inp.focus();return;}
+  (data[CY].goals = data[CY].goals||[]).push({id:Date.now(),text:t,done:false,reason:'',steps:[]});
+  inp.value=''; renderYearGoals(); save();
+}
+document.getElementById('year-goal-input').addEventListener('keydown',e=>{if(e.key==='Enter')addYearGoal();});
+
+function toggleYearGoalItem(id){
+  const g=data[CY].goals.find(g=>g.id===id);
+  if(g){g.done=!g.done;} renderYearGoals(); save();
+}
+function deleteYearGoal(id){
+  data[CY].goals=data[CY].goals.filter(g=>g.id!==id);
+  if(openYearGoalId===id) openYearGoalId=null;
+  renderYearGoals(); save();
+}
+function updateYearGoalReason(id,val){
+  const g=data[CY].goals.find(g=>g.id===id);
+  if(g) g.reason=val;
+}
+let _yearReasonTimer=null;
+function updateYearGoalReasonDebounced(id,val){
+  updateYearGoalReason(id,val);
+  clearTimeout(_yearReasonTimer);
+  _yearReasonTimer=setTimeout(()=>save(),800);
+}
+function addYearGoalStep(id){
+  const inp=document.getElementById('ygs-inp-'+id);
+  const t=inp.value.trim(); if(!t){inp.focus();return;}
+  const g=data[CY].goals.find(g=>g.id===id);
+  if(g){(g.steps=g.steps||[]).push({id:Date.now(),text:t,done:false});inp.value='';renderYearGoals();save();}
+}
+function toggleYearGoalStep(gid,sid){
+  const g=data[CY].goals.find(g=>g.id===gid);
+  const s=g?.steps?.find(s=>s.id===sid);
+  if(s){s.done=!s.done;renderYearGoals();save();}
+}
+function deleteYearGoalStep(gid,sid){
+  const g=data[CY].goals.find(g=>g.id===gid);
+  if(g){g.steps=(g.steps||[]).filter(s=>s.id!==sid);renderYearGoals();save();}
+}
+function toggleYearGoalOpen(id){
+  openYearGoalId = openYearGoalId===id ? null : id;
+  renderYearGoals();
+}
+
+function renderYearGoals(){
+  const goals = data[CY].goals||[];
+  const cont = document.getElementById('year-goals-area');
+  if(!cont) return;
+  cont.innerHTML = goals.map(g=>{
+    const isOpen = openYearGoalId===g.id;
+    const stepsDone=(g.steps||[]).filter(s=>s.done).length;
+    const stepsTotal=(g.steps||[]).length;
+    return `
+    <div style="margin-bottom:6px;border-radius:var(--radius);overflow:hidden;border:1.5px solid ${isOpen?'var(--lav-3)':'var(--cream-3)'};transition:border-color 0.2s;height:auto;">
+      <div onclick="toggleYearGoalOpen(${g.id})" style="display:flex;align-items:center;gap:9px;padding:10px 12px;background:${isOpen?'linear-gradient(135deg,var(--lav-1),var(--pink-1))':'var(--cream)'};cursor:pointer;transition:background 0.18s;user-select:none;">
+        <div class="check-box${g.done?' done':''}" onclick="event.stopPropagation();toggleYearGoalItem(${g.id})"></div>
+        <span style="flex:1;font-size:0.85rem;font-weight:600;color:${g.done?'var(--text-4)':'var(--text-1)'};${g.done?'text-decoration:line-through;':''}">
+          ${esc(g.text)}
+        </span>
+        ${stepsTotal?`<span style="font-size:0.65rem;color:var(--text-4);font-weight:600;">${stepsDone}/${stepsTotal}</span>`:''}
+        <button onclick="event.stopPropagation();deleteYearGoal(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--text-4);font-size:0.68rem;padding:2px 4px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.background='var(--pink-1)';this.style.color='var(--pink-4)'" onmouseout="this.style.background='none';this.style.color='var(--text-4)'">✕</button>
+        <span style="font-size:0.6rem;color:var(--lav-4);transition:transform 0.2s;display:inline-block;transform:rotate(${isOpen?'180':'0'}deg);">▾</span>
+      </div>
+      ${isOpen?`
+      <div style="padding:12px 14px;background:var(--white);border-top:1px solid var(--cream-3);display:flex;flex-direction:column;gap:12px;max-height:600px;overflow:hidden;transition:max-height 0.3s ease;">
+        <div>
+          <p class="section-subtitle" style="margin-bottom:5px;">Reason</p>
+          <textarea class="text-input" rows="2" placeholder="Why does this goal matter?"
+            style="font-size:0.82rem;min-height:unset;"
+            oninput="updateYearGoalReasonDebounced(${g.id},this.value)">${esc(g.reason||'')}</textarea>
+        </div>
+        <div style="max-height:420px;overflow-y:auto;">
+          <p class="section-subtitle" style="margin-bottom:6px;">Steps</p>
+          ${(g.steps||[]).map(s=>`
+            <div class="check-item" style="margin-bottom:4px;">
+              <div class="check-box${s.done?' done':''}" onclick="toggleYearGoalStep(${g.id},${s.id})"></div>
+              <span class="check-text${s.done?' done':''}">${esc(s.text)}</span>
+              <button class="check-del" onclick="deleteYearGoalStep(${g.id},${s.id})">✕</button>
+            </div>`).join('')}
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <input type="text" id="ygs-inp-${g.id}" class="text-input"
+              style="flex:1;font-size:0.8rem;padding:6px 10px;"
+              placeholder="Add a step…"
+              onkeydown="if(event.key==='Enter')addYearGoalStep(${g.id})">
+            <button class="pill-btn primary" style="font-size:0.72rem;padding:5px 12px;" onclick="addYearGoalStep(${g.id})">Add</button>
+          </div>
+        </div>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
 
 /* ═══════════════ MONTH VIEW ═══════════════ */
 function renderMonth() {
