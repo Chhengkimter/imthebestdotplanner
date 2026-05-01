@@ -406,14 +406,14 @@ body{
 .wg-task.cat-personal{background:var(--cat-personal-bg);border-color:var(--cat-personal-bd);color:var(--cat-personal-tx);}
 .wg-task.cat-work{background:var(--cat-work-bg);border-color:var(--cat-work-bd);color:var(--cat-work-tx);}
 .wg-task.cat-study{background:var(--cat-study-bg);border-color:var(--cat-study-bd);color:var(--cat-study-tx);}
-.wg-task.cat-none{background:var(--lav-1);border-color:var(--lav-2);color:var(--lav-5);}
-/* Done tasks dimmed */
+.wg-task.cat-none{background:#eeebe6;border-color:#d8d2c8;color:#6e6860;}
 .wg-task.is-done{opacity:0.38;text-decoration:line-through;}
 
 .wg-task-cat-strip{width:3px;border-radius:2px;flex-shrink:0;height:10px;align-self:center;}
 .cat-personal .wg-task-cat-strip,.wg-task.cat-personal .wg-task-cat-strip{background:var(--cat-personal-dot);}
 .wg-task.cat-work .wg-task-cat-strip{background:var(--cat-work-dot);}
 .wg-task.cat-study .wg-task-cat-strip{background:var(--cat-study-dot);}
+.wg-task.cat-none .wg-task-cat-strip{background:#bfb8ae;}
 .wg-task-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .wg-task-del{
   width:12px;height:12px;border-radius:3px;border:none;cursor:pointer;
@@ -610,22 +610,27 @@ textarea.text-input{resize:vertical;min-height:70px;line-height:1.6;}
       </div>
       <div class="goal-panel">
         <p class="section-subtitle">Monthly Goals</p>
-        <div class="check-list" id="month-goals-list"></div>
-        <div class="add-row">
-          <input type="text" class="text-input" id="month-goal-input" placeholder="Add a goal...">
+        <div id="month-goals-area"></div>
+        <div class="add-row" style="margin-top:4px;">
+          <input type="text" class="text-input" id="month-goal-input" placeholder="Add a goal…">
           <button class="pill-btn pink" onclick="addMonthGoal()">Add</button>
         </div>
       </div>
-      <div class="goal-panel">
-        <p class="section-subtitle">Reason & Motivation</p>
-        <textarea class="text-input" id="month-reason" placeholder="Why this month matters..." rows="3"></textarea>
-      </div>
-      <div class="goal-panel">
-        <p class="section-subtitle">Monthly Steps</p>
-        <div class="check-list" id="month-steps-list"></div>
-        <div class="add-row">
-          <input type="text" class="text-input" id="month-step-input" placeholder="Add a step...">
-          <button class="pill-btn primary" onclick="addMonthStep()">Add</button>
+      <div style="background:linear-gradient(145deg,#fefbf0,#fdf6e3);border:1.5px solid #e8dcb8;border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:14px;">
+        <div style="padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #e8dcb8;">
+          <span style="font-size:0.9rem;">📌</span>
+          <span style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#8a7040;flex:1;">Quick Reminders</span>
+        </div>
+        <div id="month-reminder-items" style="padding:6px 8px;"></div>
+        <div style="padding:6px 8px 8px;display:flex;gap:5px;">
+          <input type="text" id="month-reminder-inp"
+            style="flex:1;padding:6px 10px;border-radius:var(--radius-sm);border:1.5px solid #e8dcb8;background:#fffdf0;font-family:'Nunito',sans-serif;font-size:0.76rem;color:#5a4a20;outline:none;"
+            placeholder="Add a reminder…"
+            onkeydown="if(event.key==='Enter')addMonthReminder()">
+          <button onclick="addMonthReminder()"
+            style="padding:6px 12px;border-radius:var(--radius-sm);border:none;background:#c8a840;color:white;font-family:'Nunito',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap;">
+            + Add
+          </button>
         </div>
       </div>
     </div>
@@ -775,6 +780,7 @@ let CY = 2026, CM = null, CWS = null;
 let selectedTask = null; // { text, cat, todoId, pri }
 let schoolData = { subjects: [], assignments: [], projects: [] };
 let catOpen = { personal: true, work: true, study: true };
+let openGoalId = null;
 
 const MONTHS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS    = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -927,25 +933,124 @@ document.getElementById('year-step-input').addEventListener('keydown',e=>{if(e.k
 /* ═══════════════ MONTH VIEW ═══════════════ */
 function renderMonth() {
   if(CM===null) return;
+  openGoalId = null; 
   const md=data[CY][CM];
   document.getElementById('month-page-title').innerHTML=`${MONTHS[CM]} <span>${CY}</span>`;
   document.getElementById('month-breadcrumb').textContent=MONTHS[CM];
   document.getElementById('cal-month-label').textContent=`${MONTHS[CM]} ${CY}`;
-  document.getElementById('month-reason').value=md.reason||'';
-  renderCheckList('month-goals-list',md.goals||[],toggleMonthGoal,deleteMonthGoal);
-  renderCheckList('month-steps-list',md.steps||[],toggleMonthStep,deleteMonthStep);
+  renderMonthGoals();
+  renderMonthReminders();
   renderCalendar();
 }
 function goToThisWeek(){const today=new Date();CM=today.getMonth();CWS=getWeekStart(today);showWeek(CWS);}
-function addMonthGoal(){const inp=document.getElementById('month-goal-input');const t=inp.value.trim();if(!t){inp.focus();return;}(data[CY][CM].goals=data[CY][CM].goals||[]).push({id:Date.now(),text:t,done:false});inp.value='';renderCheckList('month-goals-list',data[CY][CM].goals,toggleMonthGoal,deleteMonthGoal);save();}
-function toggleMonthGoal(id){const s=data[CY][CM].goals.find(g=>g.id===id);if(s)s.done=!s.done;renderCheckList('month-goals-list',data[CY][CM].goals,toggleMonthGoal,deleteMonthGoal);save();}
-function deleteMonthGoal(id){data[CY][CM].goals=data[CY][CM].goals.filter(g=>g.id!==id);renderCheckList('month-goals-list',data[CY][CM].goals,toggleMonthGoal,deleteMonthGoal);save();}
+function addMonthGoal(){
+  const inp=document.getElementById('month-goal-input');
+  const t=inp.value.trim();
+  if(!t){inp.focus();return;}
+  (data[CY][CM].goals=data[CY][CM].goals||[]).push({id:Date.now(),text:t,done:false,reason:'',steps:[]});
+  inp.value='';
+  renderMonthGoals();
+  save();
+}
+function toggleMonthGoal(id){
+  const s=data[CY][CM].goals.find(g=>g.id===id);
+  if(s)s.done=!s.done;
+  renderMonthGoals(); save();
+}
+function deleteMonthGoal(id){
+  data[CY][CM].goals=data[CY][CM].goals.filter(g=>g.id!==id);
+  renderMonthGoals(); save();
+}
 document.getElementById('month-goal-input').addEventListener('keydown',e=>{if(e.key==='Enter')addMonthGoal();});
-function addMonthStep(){const inp=document.getElementById('month-step-input');const t=inp.value.trim();if(!t){inp.focus();return;}(data[CY][CM].steps=data[CY][CM].steps||[]).push({id:Date.now(),text:t,done:false});inp.value='';renderCheckList('month-steps-list',data[CY][CM].steps,toggleMonthStep,deleteMonthStep);save();}
-function toggleMonthStep(id){const s=data[CY][CM].steps.find(s=>s.id===id);if(s)s.done=!s.done;renderCheckList('month-steps-list',data[CY][CM].steps,toggleMonthStep,deleteMonthStep);save();}
-function deleteMonthStep(id){data[CY][CM].steps=data[CY][CM].steps.filter(s=>s.id!==id);renderCheckList('month-steps-list',data[CY][CM].steps,toggleMonthStep,deleteMonthStep);save();}
-document.getElementById('month-step-input').addEventListener('keydown',e=>{if(e.key==='Enter')addMonthStep();});
-document.getElementById('month-reason').addEventListener('input',e=>{data[CY][CM].reason=e.target.value;save();});
+function updateGoalReason(id, val){
+  const g=data[CY][CM].goals.find(g=>g.id===id);
+  if(g) g.reason=val;
+}
+let _reasonSaveTimer = null;
+function updateGoalReasonDebounced(id, val){
+  updateGoalReason(id, val);
+  clearTimeout(_reasonSaveTimer);
+  _reasonSaveTimer = setTimeout(()=>save(), 800);
+}
+function addGoalStep(id){
+  const inp=document.getElementById('gs-inp-'+id);
+  const t=inp.value.trim(); if(!t){inp.focus();return;}
+  const g=data[CY][CM].goals.find(g=>g.id===id);
+  if(g){ (g.steps=g.steps||[]).push({id:Date.now(),text:t,done:false}); inp.value=''; renderMonthGoals(); save(); }
+}
+function toggleGoalStep(gid,sid){
+  const g=data[CY][CM].goals.find(g=>g.id===gid);
+  const s=g?.steps?.find(s=>s.id===sid); if(s){ s.done=!s.done; renderMonthGoals(); save(); }
+}
+function deleteGoalStep(gid,sid){
+  const g=data[CY][CM].goals.find(g=>g.id===gid);
+  if(g){ g.steps=(g.steps||[]).filter(s=>s.id!==sid); renderMonthGoals(); save(); }
+}
+
+function renderMonthGoals(){
+  const goals = data[CY][CM].goals || [];
+  const cont = document.getElementById('month-goals-area');
+  if(!cont) return;
+
+  cont.innerHTML = goals.map((g, i) => {
+    const isOpen = openGoalId === g.id;
+    const stepsDone = (g.steps||[]).filter(s=>s.done).length;
+    const stepsTotal = (g.steps||[]).length;
+
+    return `
+    <div style="margin-bottom:6px;border-radius:var(--radius);overflow:hidden;border:1.5px solid ${isOpen?'var(--lav-3)':'var(--cream-3)'};transition:border-color 0.2s;">
+      
+      <!-- HEADER ROW -->
+      <div onclick="toggleGoalOpen(${g.id})" style="
+        display:flex;align-items:center;gap:9px;padding:10px 12px;
+        background:${isOpen?'linear-gradient(135deg,var(--lav-1),var(--pink-1))':'var(--cream)'};
+        cursor:pointer;transition:background 0.18s;user-select:none;">
+        <div class="check-box${g.done?' done':''}" onclick="event.stopPropagation();toggleMonthGoal(${g.id})"></div>
+        <span style="flex:1;font-size:0.85rem;font-weight:600;color:${g.done?'var(--text-4)':'var(--text-1)'};${g.done?'text-decoration:line-through;':''}">
+          ${esc(g.text)}
+        </span>
+        ${stepsTotal?`<span style="font-size:0.65rem;color:var(--text-4);font-weight:600;">${stepsDone}/${stepsTotal}</span>`:''}
+        <button onclick="event.stopPropagation();deleteMonthGoal(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--text-4);font-size:0.68rem;padding:2px 4px;border-radius:4px;transition:all 0.15s;" onmouseover="this.style.background='var(--pink-1)';this.style.color='var(--pink-4)'" onmouseout="this.style.background='none';this.style.color='var(--text-4)'">✕</button>
+        <span style="font-size:0.6rem;color:var(--lav-4);transition:transform 0.2s;display:inline-block;transform:rotate(${isOpen?'180':'0'}deg);">▾</span>
+      </div>
+
+      <!-- EXPANDED BODY -->
+      ${isOpen ? `
+      <div style="padding:12px 14px;background:var(--white);border-top:1px solid var(--cream-3);display:flex;flex-direction:column;gap:12px;">
+        
+        <div>
+          <p class="section-subtitle" style="margin-bottom:5px;">Reason</p>
+          <textarea class="text-input" rows="2" placeholder="Why does this goal matter?"
+            style="font-size:0.82rem;min-height:unset;"
+            oninput="updateGoalReasonDebounced(${g.id},this.value)">${esc(g.reason||'')}</textarea>
+        </div>
+
+        <div>
+          <p class="section-subtitle" style="margin-bottom:6px;">Steps</p>
+          ${(g.steps||[]).map(s=>`
+            <div class="check-item" style="margin-bottom:4px;">
+              <div class="check-box${s.done?' done':''}" onclick="toggleGoalStep(${g.id},${s.id})"></div>
+              <span class="check-text${s.done?' done':''}">${esc(s.text)}</span>
+              <button class="check-del" onclick="deleteGoalStep(${g.id},${s.id})">✕</button>
+            </div>`).join('')}
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <input type="text" id="gs-inp-${g.id}" class="text-input"
+              style="flex:1;font-size:0.8rem;padding:6px 10px;"
+              placeholder="Add a step…"
+              onkeydown="if(event.key==='Enter')addGoalStep(${g.id})">
+            <button class="pill-btn primary" style="font-size:0.72rem;padding:5px 12px;" onclick="addGoalStep(${g.id})">Add</button>
+          </div>
+        </div>
+
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggleGoalOpen(id) {
+  openGoalId = openGoalId === id ? null : id;
+  renderMonthGoals();
+}
 
 function renderCalendar() {
   document.getElementById('cal-dow').innerHTML=DAYS.map(d=>`<span>${d}</span>`).join('');
@@ -1292,6 +1397,34 @@ function deleteReminder(id) {
   renderReminders(); save();
 }
 document.getElementById('reminder-inp').addEventListener('keydown',e=>{if(e.key==='Enter')addReminder();});
+
+function renderMonthReminders() {
+  if(CM===null) return;
+  const reminders = data[CY][CM].reminders || [];
+  const cont = document.getElementById('month-reminder-items');
+  if(!cont) return;
+  cont.innerHTML = reminders.map(r=>`
+    <div style="background:#fffdf0;border:1px solid #e8dcb8;border-radius:var(--radius-sm);padding:7px 10px;margin-bottom:5px;display:flex;align-items:flex-start;gap:6px;font-size:0.76rem;color:#5a4a20;line-height:1.4;">
+      <span style="font-size:0.7rem;flex-shrink:0;margin-top:1px;">📌</span>
+      <span style="flex:1;">${esc(r.text)}</span>
+      <button onclick="deleteMonthReminder(${r.id})" style="background:none;border:none;cursor:pointer;color:#c8bca8;font-size:0.6rem;padding:1px 3px;border-radius:3px;transition:all 0.15s;" onmouseover="this.style.color='var(--pink-4)'" onmouseout="this.style.color='#c8bca8'">✕</button>
+    </div>`).join('') ||
+    `<p style="font-size:0.73rem;color:#c0a860;padding:4px;font-style:italic;">No reminders yet…</p>`;
+}
+
+function addMonthReminder() {
+  const inp = document.getElementById('month-reminder-inp');
+  const t = inp.value.trim(); if(!t){inp.focus();return;}
+  if(CM===null) return;
+  (data[CY][CM].reminders = data[CY][CM].reminders||[]).push({id:Date.now(), text:t});
+  inp.value=''; renderMonthReminders(); save();
+}
+
+function deleteMonthReminder(id) {
+  if(CM===null) return;
+  data[CY][CM].reminders = (data[CY][CM].reminders||[]).filter(r=>r.id!==id);
+  renderMonthReminders(); save();
+}
 
 /* ═══════════════ SHARED UTILITIES ═══════════════ */
 function renderCheckList(containerId, items, toggleFn, deleteFn) {
