@@ -1317,7 +1317,7 @@ function renderAssignments() {
       ondragstart="onAssignmentDragStart(${a.id}, event)">
       <td>${esc(a.name)}</td>
       <td>${esc(a.subject || '—')}</td>
-      <td>${deadlineBadge(a.deadline)}</td>
+      <td><input type="date" value="${a.deadline||''}" onchange="updateAsgnDeadline(${a.id},this.value)" style="border:1.5px solid var(--cream-3);border-radius:6px;padding:4px 8px;font-size:0.78rem;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text-2);outline:none;cursor:pointer;"></td>
       <td><span class="priority-badge ${pClass[a.priority]||'p-mid'}">${pLabel[a.priority]||'Medium'}</span></td>
       <td>
        <button class="status-btn ${st}" onclick="setAssignmentStatus(${a.id},'${nextMap[st]}')">${stLabel[st]}</button>
@@ -1395,6 +1395,11 @@ function renderProjects() {
 function updateProjDeadline(id, val) {
   const p = schoolData.projects.find(p => p.id == id);
   if (p) { p.deadline = val; saveSchool(); }
+}
+
+function updateAsgnDeadline(id, val) {
+  const a = schoolData.assignments.find(a => a.id == id);
+  if (a) { a.deadline = val; saveSchool(); renderAssignments(); }
 }
 
 function toggleProjTask(projId, taskId, checked) {

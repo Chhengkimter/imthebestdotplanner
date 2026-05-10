@@ -561,7 +561,7 @@ body {
     <div class="section-title">🎯 Savings Goals</div>
     <form class="add-goal-form" onsubmit="addGoal(event)">
       <input type="text"   id="goalName"   placeholder="Goal name…"    required>
-      <input type="number" id="goalTarget" placeholder="Target amount" min="0" step="100" required>
+      <input type="number" id="goalTarget" placeholder="Target amount" min="0" step="0.01" required>
       <button type="submit" class="add-goal-btn">Create Goal</button>
     </form>
     <div class="goals-grid" id="goalsGrid"></div>

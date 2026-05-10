@@ -358,10 +358,11 @@ body{
 /* ── TIMETABLE (right) ── */
 .week-grid-wrap{
   flex:1;min-width:0;background:var(--white);border-radius:var(--radius);
-  border:1px solid var(--cream-3);box-shadow:var(--shadow-sm);overflow:hidden;
+  border:1px solid var(--cream-3);box-shadow:var(--shadow-sm);
+  overflow-x:auto;overflow-y:hidden;
 }
-.week-grid-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
-.week-grid{display:grid;grid-template-columns:50px repeat(7,1fr);}
+.week-grid-scroll{flex:1;overflow-y:auto;overflow-x:visible;display:flex;flex-direction:column;min-width:700px;}
+.week-grid { display:flex; flex-direction:column; flex:1; }
 
 .wg-corner{
   position:sticky;top:0;z-index:12;background:var(--cream-2);
@@ -432,6 +433,11 @@ body{
 
 /* Scheduling mode cursor on grid */
 .week-grid-wrap.scheduling-mode .wg-slot{cursor:crosshair;}
+
+/* Grid-task drag states */
+.wg-task[draggable]{cursor:grab;}
+.wg-task.dragging{opacity:0.35;transform:scale(0.96);}
+.wg-slot.drag-over{background:var(--lav-1);outline:2px dashed var(--lav-3);outline-offset:-2px;}
 
 /* ── SHARED UTILITY ── */
 .text-input{width:100%;padding:9px 13px;border-radius:var(--radius-sm);border:1.5px solid var(--cream-3);background:var(--cream);font-family:'Nunito',sans-serif;font-size:0.85rem;color:var(--text-1);outline:none;transition:all 0.18s;}
@@ -511,6 +517,53 @@ textarea.text-input{resize:vertical;min-height:70px;line-height:1.6;}
   .day-cell{width:30px;min-width:30px;height:40px;}
   .day-dot{width:20px;height:20px;}
 }
+
+/* Absolute task blocks */
+.wg-task-block {
+  position:absolute; left:3px;
+  border-radius:6px; padding:4px 7px 10px;
+  font-size:0.62rem; line-height:1.35;
+  border:1.5px solid transparent;
+  box-shadow:0 1px 6px rgba(0,0,0,0.09);
+  z-index:3; overflow:hidden;
+  display:flex; flex-direction:column; gap:1px;
+  box-sizing:border-box;
+}
+.wg-task-block.cat-personal{background:var(--cat-personal-bg);border-color:var(--cat-personal-bd);color:var(--cat-personal-tx);}
+.wg-task-block.cat-work    {background:var(--cat-work-bg);    border-color:var(--cat-work-bd);    color:var(--cat-work-tx);}
+.wg-task-block.cat-study   {background:var(--cat-study-bg);   border-color:var(--cat-study-bd);   color:var(--cat-study-tx);}
+.wg-task-block.cat-none    {background:#eeebe6;border-color:#d8d2c8;color:#6e6860;}
+.wg-task-block-text { font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wg-task-block-dur  { font-size:0.55rem; opacity:0.65; }
+.wg-task-block-del  {
+  position:absolute; top:3px; right:4px;
+  background:rgba(0,0,0,0.08); border:none; border-radius:3px;
+  width:14px; height:14px; cursor:pointer; font-size:0.5rem;
+  display:none; align-items:center; justify-content:center; color:inherit;
+}
+.wg-task-block:hover .wg-task-block-del { display:flex; }
+
+/* Resize handle at the bottom of each block */
+.wg-task-resize {
+  position:absolute; bottom:0; left:0; right:0; height:9px;
+  cursor:ns-resize; display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 0.15s;
+}
+.wg-task-resize::after {
+  content:''; width:22px; height:2px;
+  background:currentColor; opacity:0.4; border-radius:2px;
+}
+.wg-task-block:hover .wg-task-resize { opacity:1; }
+
+/* Hour background slots */
+.wg-hour-slot {
+  position:absolute; left:0; right:0;
+  border-bottom:1px solid var(--cream-2);
+  box-sizing:border-box; z-index:1;
+  transition:background 0.1s;
+}
+.wg-hour-slot:hover      { background:var(--lav-1); }
+.wg-hour-slot.drag-over  { background:var(--lav-1); outline:2px dashed var(--lav-3); outline-offset:-2px; }
 </style>
 </head>
 <body>
@@ -1190,6 +1243,41 @@ document.getElementById('week-goal-input').addEventListener('input', e => {
   data[CY][CM].weekGoals[wk]=e.target.value;
   save();
 });
+// ── compute overlap columns for stacking ──
+function getStackedLayout(tasks, slotH) {
+  // Each task: { top, bottom } in pixels
+  const laid = tasks.map(t => {
+    const hi = HOURS.indexOf(t.hour);
+    const top = hi * slotH + 2;
+    const dur = t.duration || 60;
+    const bottom = top + Math.max(20, (dur / 60) * slotH - 4);
+    return { t, top, bottom, col: 0, totalCols: 1 };
+  });
+
+  // Simple greedy column assignment
+  for (let i = 0; i < laid.length; i++) {
+    const cols = []; // which cols are taken by overlapping tasks
+    for (let j = 0; j < i; j++) {
+      if (laid[j].bottom > laid[i].top && laid[j].top < laid[i].bottom) {
+        cols.push(laid[j].col);
+      }
+    }
+    let col = 0;
+    while (cols.includes(col)) col++;
+    laid[i].col = col;
+  }
+
+  // Find totalCols for each group (tasks that overlap any member)
+  laid.forEach(a => {
+    let max = a.col;
+    laid.forEach(b => {
+      if (b.bottom > a.top && b.top < a.bottom) max = Math.max(max, b.col);
+    });
+    a.totalCols = max + 1;
+  });
+
+  return laid;
+}
 
 function renderWeekView() {
   if(!CWS) return;
@@ -1209,12 +1297,16 @@ function renderWeekView() {
   const wkGoal = data[CY]?.[CM]?.weekGoals?.[weekKey]||'';
   document.getElementById('week-goal-input').value=wkGoal;
 
-  const grid=document.getElementById('week-grid');
-  let html=`<div class="wg-corner"><span>time</span></div>`;
+  const grid = document.getElementById('week-grid');
+  const SLOT_H = 56; // px per hour — matches your existing .wg-time height
+  let html = '';
 
+  // ── Sticky header row ──
+  html += `<div style="display:grid;grid-template-columns:50px repeat(7,minmax(90px,1fr));
+    position:sticky;top:0;z-index:12;background:var(--white);border-bottom:1px solid var(--cream-3);min-width:700px;">`;
+  html += `<div class="wg-corner"><span>time</span></div>`;
   weekDays.forEach((d,i)=>{
-    const ds=fmtDate(d), isToday=ds===todayStr;
-    const dm=d.getMonth();
+    const ds=fmtDate(d), isToday=ds===todayStr, dm=d.getMonth();
     const allTasks=data[CY]?.[dm]?.weeks?.[weekKey]?.[ds]||[];
     const cnt=allTasks.length;
     html+=`<div class="wg-day-head${isToday?' today':''}">
@@ -1223,29 +1315,79 @@ function renderWeekView() {
       ${cnt?`<div class="wg-day-cnt">${cnt} task${cnt>1?'s':''}</div>`:''}
     </div>`;
   });
+  html += `</div>`;
 
+  // ── Body: time column + 7 day columns ──
+  html += `<div style="display:flex;flex:1;min-width:700px;">`;
+
+  // Time labels
+  html += `<div style="width:50px;flex-shrink:0;border-right:1px solid var(--cream-3);background:var(--cream);">`;
   HOURS.forEach(hour=>{
-    html+=`<div class="wg-time"><span>${fmtHour(hour)}</span></div>`;
-    weekDays.forEach(d=>{
-      const ds=fmtDate(d), dm=d.getMonth();
-      const tasks=(data[CY]?.[dm]?.weeks?.[weekKey]?.[ds]||[]).filter(t=>t.hour===hour);
-      html+=`<div class="wg-col">
-        <div class="wg-slot" onclick="handleSlot('${ds}',${hour},${dm},event)" ondragover="event.preventDefault()" ondrop="dropTask('${ds}',${hour},${dm},event)" data-date="${ds}" data-hour="${hour}">
-          ${!tasks.length?`<div class="wg-add-hint">+ schedule</div>`:''}
-          <div class="wg-tasks">
-            ${tasks.filter(t => !isTodoDone(t.cat, t.todoId, t.text)).map(t=>{
-            const catCls=t.cat?`cat-${t.cat}`:'cat-none';
-            return `<div class="wg-task ${catCls}" onclick="event.stopPropagation()" title="${esc(t.text)}">
-                <div class="wg-task-cat-strip"></div>
-                <span class="wg-task-text">${esc(t.text)}</span>
-                <button class="wg-task-del" onclick="delSlotTask('${ds}',${hour},${dm},${t.id})">✕</button>
-              </div>`;
-            }).join('')}
-          </div>
-        </div>
+    html+=`<div class="wg-time" style="height:${SLOT_H}px;"><span>${fmtHour(hour)}</span></div>`;
+  });
+  html += `</div>`;
+
+  // Day columns
+  weekDays.forEach((d,i)=>{
+    const ds=fmtDate(d), dm=d.getMonth();
+    const dayTasks=(data[CY]?.[dm]?.weeks?.[weekKey]?.[ds]||[])
+      .filter(t=>!isTodoDone(t.cat,t.todoId,t.text));
+
+    html+=`<div style="flex:1;min-width:90px;position:relative;
+      height:${HOURS.length*SLOT_H}px;
+      border-right:${i<6?'1px solid var(--cream-3)':'none'};">`;
+
+    // Hour background slots (click / drop targets)
+    HOURS.forEach((hour,hi)=>{
+      html+=`<div class="wg-hour-slot"
+        style="top:${hi*SLOT_H}px;height:${SLOT_H}px;"
+        onclick="handleSlot('${ds}',${hour},${dm},event)"
+        ondragover="slotDragOver(event)"
+        ondragleave="slotDragLeave(event)"
+        ondrop="dropTask('${ds}',${hour},${dm},event)"
+        data-date="${ds}" data-hour="${hour}"></div>`;
+    });
+
+    // Absolutely-positioned task blocks (can span hours)
+    // Absolutely-positioned task blocks (stacked side by side)
+    const laid = getStackedLayout(dayTasks, SLOT_H);
+    laid.forEach(({ t, top: topPx, bottom, col, totalCols }) => {
+      const heightPx = bottom - topPx;
+      const catCls = t.cat ? `cat-${t.cat}` : 'cat-none';
+      const dur = t.duration || 60;
+      const durLabel = dur < 60 ? `${dur} min` : dur === 60 ? '1 hr' : `${(dur/60).toFixed(1).replace('.0','')} hr`;
+
+      // Calculate left/width as percentage of column width
+      const pct = 100 / totalCols;
+      const leftPct = col * pct;
+      const widthPct = pct;
+      const gap = 2; // px gap between stacked tasks
+
+      html += `<div class="wg-task-block ${catCls}"
+        data-task-id="${t.id}"
+        style="top:${topPx}px;height:${heightPx}px;
+              left:calc(${leftPct}% + ${col === 0 ? 3 : gap}px);
+              width:calc(${widthPct}% - ${col === 0 ? 3 + gap : gap * 2}px);"
+        draggable="true"
+        ondragstart="dragGridTask(event,'${ds}',${t.hour},${dm},${t.id})"
+        ondragend="dragGridTaskEnd(event)"
+        ondragover="event.preventDefault();event.stopPropagation();event.dataTransfer.dropEffect='move';this.style.outline='2px dashed var(--lav-3)'"
+        ondragleave="this.style.outline=''"
+        ondrop="event.stopPropagation();dropTask('${ds}',${t.hour},${dm},event)"
+        ondblclick="promptDuration('${ds}',${t.hour},${dm},${t.id})"
+        onclick="selectedTask ? handleSlot('${ds}',${t.hour},${dm},event) : event.stopPropagation()">
+        <span class="wg-task-block-text">${esc(t.text)}</span>
+        ${heightPx > 28 ? `<span class="wg-task-block-dur">${durLabel}</span>` : ''}
+        <button class="wg-task-block-del"
+          onclick="event.stopPropagation();delSlotTask('${ds}',${t.hour},${dm},${t.id})">✕</button>
+        <div class="wg-task-resize"
+          onmousedown="startResize(event,'${ds}',${t.hour},${dm},${t.id})"></div>
       </div>`;
     });
+
+    html+=`</div>`; // day col
   });
+  html+=`</div>`; // body flex row
 
   grid.innerHTML=html;
   renderTaskPanel();
@@ -1396,6 +1538,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') clearSelectedTask(
 /* ═══════════════ SLOT INTERACTION ═══════════════ */
 let _pendingSlot=null;
 
+/* ── Sidebar → Grid drag ── */
 function dragTask(idx) {
   const task = _panelTasks[idx];
   if (!task) return;
@@ -1404,21 +1547,71 @@ function dragTask(idx) {
     `"${task.text.length>26 ? task.text.slice(0,26)+'…' : task.text}" — drop on a slot`;
   document.getElementById('schedule-hint').classList.add('show');
   document.getElementById('week-grid-wrap').classList.add('scheduling-mode');
-  // Store idx for drop handler
   window._dragTaskIdx = idx;
+  _dragGridTask = null; // not a grid drag
 }
 
+/* ── Grid → Grid drag ── */
+let _dragGridTask = null; // { ds, hour, month, id, taskObj }
+
+function dragGridTask(event, ds, hour, month, id) {
+  event.stopPropagation();
+  const wk = fmtDate(CWS);
+  const arr = data[CY]?.[month]?.weeks?.[wk]?.[ds] || [];
+  const taskObj = arr.find(t => t.id === id);
+  if (!taskObj) return;
+  _dragGridTask = { ds, hour, month, id, taskObj };
+  window._dragTaskIdx = null; // not a sidebar drag
+  event.currentTarget.classList.add('dragging');
+  event.dataTransfer.effectAllowed = 'move';
+}
+
+function dragGridTaskEnd(event) {
+  event.currentTarget.classList.remove('dragging');
+  event.currentTarget.style.outline = ''; // clear any drop-target outline
+  document.querySelectorAll('.wg-slot.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+
+/* ── Slot drag-over visual feedback ── */
+function slotDragOver(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  event.currentTarget.classList.add('drag-over');
+}
+function slotDragLeave(event) {
+  event.currentTarget.classList.remove('drag-over');
+}
+
+/* ── Drop handler (handles both sources) ── */
 function dropTask(ds, hour, month, event) {
   event.preventDefault();
-  const task = _panelTasks[window._dragTaskIdx];
-  if (!task) return;
-  placeTask(ds, hour, month, task);
-  clearSelectedTask();
-  window._dragTaskIdx = null;
+  event.currentTarget.classList.remove('drag-over');
+
+  if (_dragGridTask) {
+    // Grid → Grid move
+    const { ds: srcDs, hour: srcHour, month: srcMonth, id, taskObj } = _dragGridTask;
+    _dragGridTask = null;
+    // Skip if dropped on the exact same slot
+    if (srcDs === ds && srcHour === hour && srcMonth === month) return;
+    // Remove from source
+    const wk = fmtDate(CWS);
+    const srcArr = data[CY]?.[srcMonth]?.weeks?.[wk]?.[srcDs];
+    if (srcArr) data[CY][srcMonth].weeks[wk][srcDs] = srcArr.filter(t => t.id !== id);
+    // Add to destination
+    placeTask(ds, hour, month, taskObj);
+  } else {
+    // Sidebar → Grid
+    const task = _panelTasks[window._dragTaskIdx];
+    if (!task) return;
+    placeTask(ds, hour, month, task);
+    clearSelectedTask();
+    window._dragTaskIdx = null;
+  }
 }
 
 function handleSlot(ds, hour, month, event) {
   if(event.target.closest('.wg-task-del')) return;
+  if(event.target.closest('.wg-task-block') && !selectedTask) return;
   if(selectedTask) {
     // Place selected task
     placeTask(ds, hour, month, selectedTask);
@@ -1440,7 +1633,7 @@ function placeTask(ds, hour, month, taskObj) {
   if(!md.weeks[wk]) md.weeks[wk]={};
   if(!md.weeks[wk][ds]) md.weeks[wk][ds]=[];
   md.weeks[wk][ds].push({
-    id:Date.now(), hour, text:taskObj.text,
+    id:Date.now(), hour, duration: 60, text:taskObj.text,
     cat:taskObj.cat||null, todoId:taskObj.todoId!=null?String(taskObj.todoId):null, pri:taskObj.pri||'m'
   });
   renderWeekView(); save();
@@ -1548,6 +1741,58 @@ function isTodoDone(cat, todoId, text) {
 }
 initData();
 renderYear();
+/* ── Resize drag (bottom handle) ── */
+let _resizeState = null;
+
+function startResize(e, ds, hour, month, id) {
+  e.stopPropagation(); e.preventDefault();
+  const wk = fmtDate(CWS);
+  const task = data[CY]?.[month]?.weeks?.[wk]?.[ds]?.find(t=>t.id===id);
+  if(!task) return;
+  _resizeState = { ds, hour, month, id, startY:e.clientY, startDur:task.duration||60, currentDur:task.duration||60 };
+  document.addEventListener('mousemove', doResize);
+  document.addEventListener('mouseup', endResize);
+}
+
+function doResize(e) {
+  if(!_resizeState) return;
+  const {ds,hour,month,id,startY,startDur} = _resizeState;
+  const dy = e.clientY - startY;
+  // 56px = 60 min; snap to nearest 15 min
+  let newDur = startDur + Math.round(dy * (60/56) / 15) * 15;
+  newDur = Math.max(15, Math.min(newDur, 480));
+  _resizeState.currentDur = newDur;
+  // Update DOM live (no re-render needed)
+  const block = document.querySelector(`[data-task-id="${id}"]`);
+  if(block) {
+    block.style.height = Math.max(20,(newDur/60)*56-4)+'px';
+    const dl = block.querySelector('.wg-task-block-dur');
+    if(dl) dl.textContent = newDur<60?`${newDur} min`:newDur===60?'1 hr':`${(newDur/60).toFixed(1).replace('.0','')} hr`;
+  }
+}
+
+function endResize(e) {
+  if(!_resizeState) return;
+  document.removeEventListener('mousemove', doResize);
+  document.removeEventListener('mouseup', endResize);
+  const {ds,hour,month,id,currentDur} = _resizeState;
+  _resizeState = null;
+  const wk = fmtDate(CWS);
+  const task = data[CY]?.[month]?.weeks?.[wk]?.[ds]?.find(t=>t.id===id);
+  if(task) { task.duration = currentDur; save(); renderWeekView(); }
+}
+
+/* ── Double-click to type a duration ── */
+function promptDuration(ds, hour, month, id) {
+  const wk = fmtDate(CWS);
+  const task = data[CY]?.[month]?.weeks?.[wk]?.[ds]?.find(t=>t.id===id);
+  if(!task) return;
+  const cur = task.duration||60;
+  const input = prompt(`Set duration for "${task.text}"\nEnter minutes (e.g. 15, 30, 45, 60, 90, 120)`, cur);
+  if(!input) return;
+  const n = parseInt(input);
+  if(!isNaN(n) && n>=15) { task.duration=Math.min(n,480); renderWeekView(); save(); }
+}
 </script>
 </body>
 </html>
